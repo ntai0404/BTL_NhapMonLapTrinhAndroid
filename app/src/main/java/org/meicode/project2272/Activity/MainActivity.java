@@ -18,10 +18,12 @@ import androidx.viewpager2.widget.MarginPageTransformer;
 
 import android.view.View;
 import org.meicode.project2272.Adapter.CategoryAdapter;
+import org.meicode.project2272.Adapter.PopularAdapter;
 
 import org.meicode.project2272.R;
 
 import java.util.ArrayList;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -37,7 +39,24 @@ public class MainActivity extends AppCompatActivity {
         viewModel= new MainViewModel();
         initCategory();
         initBanner();
+        initPopular();
+
     }
+
+    private void initPopular() {
+        binding.progressBarPopular.setVisibility(View.VISIBLE);
+        viewModel.loadPopular().observeForever(itemsModels -> {
+            if(itemsModels!=null){
+                binding.popularView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
+                binding.popularView.setAdapter(new PopularAdapter(itemsModels));
+                binding.popularView.setNestedScrollingEnabled(true);
+            }
+            binding.progressBarPopular.setVisibility(View.GONE);
+        });
+        viewModel.loadPopular();
+    }
+
+
 
     private void initBanner() {
         binding.progressBarSlider.setVisibility(View.VISIBLE);

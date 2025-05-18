@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.LiveData;
 import org.meicode.project2272.Domain.BannerModel;
 import org.meicode.project2272.Domain.CategoryModel;
+import org.meicode.project2272.Domain.ItemsModel;
 import org.meicode.project2272.Respository.MainRespository;
 import java.util.ArrayList;
 
@@ -16,5 +17,8 @@ public class MainViewModel extends ViewModel {
     };
     public LiveData<ArrayList<BannerModel>> loadBanner(){
         return respository.loadBanner();
+    }
+    public LiveData<ArrayList<ItemsModel>> loadPopular(){
+        return respository.loadPopular();
     }
 }
