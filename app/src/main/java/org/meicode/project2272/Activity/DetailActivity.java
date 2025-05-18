@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 
+import org.meicode.project2272.Adapter.ColorAdapter;
 import org.meicode.project2272.Adapter.PicListAdapter;
 import org.meicode.project2272.Adapter.SizeAdapter;
 import org.meicode.project2272.Domain.ItemsModel;
@@ -45,12 +46,18 @@ public class DetailActivity extends AppCompatActivity {
         getBundle();
         initPicList();
         initSize();
+        initColor();
+    }
+
+    private void initColor() {
+        binding.recyclerColor.setAdapter(new ColorAdapter(object.getColor()));
+        binding.recyclerColor.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
     }
 
     private void initSize() {
         binding.recyclerSize.setAdapter(new SizeAdapter(object.getSize()));
-        binding.recyclerSize.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        binding.recyclerSize.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, true));
 
     }
 
