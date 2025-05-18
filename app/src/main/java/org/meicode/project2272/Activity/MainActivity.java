@@ -17,6 +17,9 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
 import android.view.View;
+
+import com.ismaeldivita.chipnavigation.ChipNavigationBar;
+
 import org.meicode.project2272.Adapter.CategoryAdapter;
 import org.meicode.project2272.Adapter.PopularAdapter;
 
@@ -40,7 +43,17 @@ public class MainActivity extends AppCompatActivity {
         initCategory();
         initBanner();
         initPopular();
+        bottomNavigation();
+    }
 
+    private void bottomNavigation() {
+        binding.bottomNavigation.setItemSelected(R.id.home,true);
+        binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(int i) {
+
+            }
+        });
     }
 
     private void initPopular() {
