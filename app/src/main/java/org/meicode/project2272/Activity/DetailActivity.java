@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.bumptech.glide.Glide;
 
 import org.meicode.project2272.Adapter.PicListAdapter;
+import org.meicode.project2272.Adapter.SizeAdapter;
 import org.meicode.project2272.Domain.ItemsModel;
 import org.meicode.project2272.Helper.ManagmentCart;
 import org.meicode.project2272.R;
@@ -43,6 +44,13 @@ public class DetailActivity extends AppCompatActivity {
 
         getBundle();
         initPicList();
+        initSize();
+
+    }
+
+    private void initSize() {
+        binding.recyclerSize.setAdapter(new SizeAdapter(object.getSize()));
+        binding.recyclerSize.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
     }
 
