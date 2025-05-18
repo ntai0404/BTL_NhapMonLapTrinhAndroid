@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.content.Context;
 import java.util.ArrayList;
 import android.view.LayoutInflater;
+import android.content.Intent;
+import android.view.View.OnClickListener;
+
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,11 +21,9 @@ import com.bumptech.glide.request.RequestOptions;
 
 import org.meicode.project2272.Domain.ItemsModel;
 import org.meicode.project2272.databinding.ViewholderPopularBinding;
+import org.meicode.project2272.Activity.DetailActivity;
 
 import org.meicode.project2272.R;
-import org.meicode.project2272.databinding.ViewholderPopularBinding;
-
-
 
 public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHolder> {
     private ArrayList<ItemsModel> items;
@@ -57,6 +58,13 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
                 .load(items.get(position).getPicUrl().get(0))
                 .apply(options)
                 .into(holder.binding.pic);
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent= new Intent(context, DetailActivity.class);
+            intent.putExtra("object", items.get(position));
+            context.startActivity(intent);
+        });
+
     }
 
     @Override

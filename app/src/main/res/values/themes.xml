@@ -17,4 +17,11 @@
         <item name="cornerSize">10dp</item>
     </style>
 
+    <style name="FullCircleImageView">
+        <!-- Đặt kiểu góc là bo tròn -->
+        <item name="cornerFamily">rounded</item>
+        <!-- Bán kính bo tròn là 10dp -->
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>

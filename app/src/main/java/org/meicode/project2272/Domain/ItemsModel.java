@@ -14,7 +14,7 @@ public class ItemsModel implements Serializable {
     private int oldPrice;
     private int review;
     private double rating;
-    private int NumberInCart;
+    private int NumberinCart;
 
     public ItemsModel() {}
 
@@ -98,12 +98,12 @@ public class ItemsModel implements Serializable {
         this.rating = rating;
     }
 
-    public int getNumberInCart() {
-        return NumberInCart;
+    public int getNumberinCart() {
+        return NumberinCart;
     }
 
-    public void setNumberInCart(int numberInCart) {
-        NumberInCart = numberInCart;
+    public void setNumberinCart(int numberInCart) {
+        NumberinCart = numberInCart;
     }
 }
 
