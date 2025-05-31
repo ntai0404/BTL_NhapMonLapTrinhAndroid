@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "712710333284",
+    "project_id": "project227-2-2e96a",
+    "storage_bucket": "project227-2-2e96a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:712710333284:android:cd5ed20c666656c282d071",
+        "android_client_info": {
+          "package_name": "org.meicode.project2272"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1Y-avY77MHVDgEpB5loGFe2oxQGtJThI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

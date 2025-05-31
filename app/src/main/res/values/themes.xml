@@ -1,0 +1,27 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Theme gốc (cơ sở) của ứng dụng -->
+    <style name="Base.Theme.Project2272" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Đây là nơi bạn có thể tùy chỉnh màu sắc cho theme sáng -->
+        <!-- Ví dụ: <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <!-- Theme chính kế thừa từ theme gốc -->
+    <style name="Theme.Project2272" parent="Base.Theme.Project2272" />
+
+    <!-- Style dùng để bo tròn góc cho các View như ImageView, CardView (nếu hỗ trợ Material Design) -->
+    <style name="circleImageView">
+        <!-- Đặt kiểu góc là bo tròn -->
+        <item name="cornerFamily">rounded</item>
+        <!-- Bán kính bo tròn là 10dp -->
+        <item name="cornerSize">10dp</item>
+    </style>
+
+    <style name="FullCircleImageView">
+        <!-- Đặt kiểu góc là bo tròn -->
+        <item name="cornerFamily">rounded</item>
+        <!-- Bán kính bo tròn là 10dp -->
+        <item name="cornerSize">50%</item>
+    </style>
+
+</resources>
