@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import org.meicode.project2272.Domain.CategoryModel;
+import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.databinding.ViewholderCategoryBinding;
 import org.meicode.project2272.R;
 

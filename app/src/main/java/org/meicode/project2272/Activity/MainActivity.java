@@ -6,16 +6,17 @@ import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
-import com.ismaeldivita.chipnavigation.ChipNavigationBar;
-
 import org.meicode.project2272.Adapter.CategoryAdapter;
 import org.meicode.project2272.Adapter.PopularAdapter;
 import org.meicode.project2272.Adapter.SliderAdapter;
-import org.meicode.project2272.Domain.BannerModel;
+import org.meicode.project2272.Model.BannerModel;
+import org.meicode.project2272.Model.CategoryModel;
+import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.R;
 import org.meicode.project2272.ViewModel.MainViewModel;
 import org.meicode.project2272.databinding.ActivityMainBinding;
@@ -34,24 +35,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         viewModel = new MainViewModel();
+
         initCategory();
         initBanner();
         initPopular();
         bottomNavigation();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
-        binding.bottomNavigation.setItemSelected(R.id.home, true); // reset selection về Home
+        binding.bottomNavigation.setItemSelected(R.id.home, true);
     }
-
 
     private void bottomNavigation() {
         binding.cartBtn.setOnClickListener(v ->
                 startActivity(new Intent(MainActivity.this, CartActivity.class))
         );
 
-        // Dùng if-else thay vì switch (vì lỗi Constant expression)
         binding.bottomNavigation.setItemSelected(R.id.home, true);
         binding.bottomNavigation.setOnItemSelectedListener(itemId -> {
             if (itemId == R.id.home || itemId == R.id.favorites) {
@@ -59,34 +60,41 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.cart) {
                 startActivity(new Intent(MainActivity.this, CartActivity.class));
             } else if (itemId == R.id.profile) {
-                // Chưa có xử lý
+                // Chưa xử lý
             }
-
         });
     }
 
     private void initPopular() {
         binding.progressBarPopular.setVisibility(View.VISIBLE);
-        viewModel.loadPopular().observeForever(itemsModels -> {
-            if (itemsModels != null) {
-                binding.popularView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-                binding.popularView.setAdapter(new PopularAdapter(itemsModels));
-                binding.popularView.setNestedScrollingEnabled(true);
+
+        viewModel.loadPopular().observe(this, new Observer<ArrayList<ItemsModel>>() {
+            @Override
+            public void onChanged(ArrayList<ItemsModel> itemsModels) {
+                if (itemsModels != null) {
+                    binding.popularView.setLayoutManager(
+                            new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false)
+                    );
+                    binding.popularView.setAdapter(new PopularAdapter(itemsModels));
+                    binding.popularView.setNestedScrollingEnabled(true);
+                }
+                binding.progressBarPopular.setVisibility(View.GONE);
             }
-            binding.progressBarPopular.setVisibility(View.GONE);
         });
-        viewModel.loadPopular();
     }
 
     private void initBanner() {
         binding.progressBarSlider.setVisibility(View.VISIBLE);
-        viewModel.loadBanner().observeForever(bannerModels -> {
-            if (bannerModels != null && !bannerModels.isEmpty()) {
-                banners(bannerModels);
+
+        viewModel.loadBanner().observe(this, new Observer<ArrayList<BannerModel>>() {
+            @Override
+            public void onChanged(ArrayList<BannerModel> bannerModels) {
+                if (bannerModels != null && !bannerModels.isEmpty()) {
+                    banners(bannerModels);
+                }
+                binding.progressBarSlider.setVisibility(View.GONE);
             }
-            binding.progressBarSlider.setVisibility(View.GONE);
         });
-        viewModel.loadBanner();
     }
 
     private void banners(ArrayList<BannerModel> bannerModels) {
@@ -103,11 +111,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void initCategory() {
         binding.progressBarCategory.setVisibility(View.VISIBLE);
-        viewModel.loadCategory().observeForever(categoryModels -> {
-            binding.categoryView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-            binding.categoryView.setAdapter(new CategoryAdapter(categoryModels));
-            binding.categoryView.setNestedScrollingEnabled(true);
-            binding.progressBarCategory.setVisibility(View.GONE);
+
+        viewModel.loadCategory().observe(this, new Observer<ArrayList<CategoryModel>>() {
+            @Override
+            public void onChanged(ArrayList<CategoryModel> categoryModels) {
+                binding.categoryView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
+                binding.categoryView.setAdapter(new CategoryAdapter(categoryModels));
+                binding.categoryView.setNestedScrollingEnabled(true);
+                binding.progressBarCategory.setVisibility(View.GONE);
+            }
         });
     }
 }
+

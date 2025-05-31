@@ -2,14 +2,10 @@ package org.meicode.project2272.Activity;
 
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
@@ -17,9 +13,8 @@ import com.bumptech.glide.Glide;
 import org.meicode.project2272.Adapter.ColorAdapter;
 import org.meicode.project2272.Adapter.PicListAdapter;
 import org.meicode.project2272.Adapter.SizeAdapter;
-import org.meicode.project2272.Domain.ItemsModel;
+import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Helper.ManagmentCart;
-import org.meicode.project2272.R;
 import org.meicode.project2272.databinding.ActivityDetailBinding;
 
 import java.util.ArrayList;

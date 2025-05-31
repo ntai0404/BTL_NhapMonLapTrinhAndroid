@@ -2,12 +2,10 @@ package org.meicode.project2272.Helper;
 
 import android.content.Context;
 import android.widget.Toast;
-import org.meicode.project2272.Domain.ItemsModel;
-import org.meicode.project2272.Helper.TinyDB;
+import org.meicode.project2272.Model.ItemsModel;
 
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ManagmentCart {
 

@@ -2,10 +2,9 @@ package org.meicode.project2272.Adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import java.util.ArrayList;
-import org.meicode.project2272.Domain.ItemsModel;
+import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Helper.ChangeNumberItemsListener;
 import org.meicode.project2272.Helper.ManagmentCart;
 import org.meicode.project2272.databinding.ViewholderCartBinding;

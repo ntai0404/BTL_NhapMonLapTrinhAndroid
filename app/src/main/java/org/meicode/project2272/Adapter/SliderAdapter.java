@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import org.meicode.project2272.R;
-import org.meicode.project2272.Domain.BannerModel;
+import org.meicode.project2272.Model.BannerModel;
 import com.bumptech.glide.Glide;// phai hoc thuoc nguon nay nhe khong auto import duoc:v
 
 

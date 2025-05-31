@@ -1,4 +1,4 @@
-package org.meicode.project2272.Domain;
+package org.meicode.project2272.Model;
 
 public class BannerModel {
     private String url;
