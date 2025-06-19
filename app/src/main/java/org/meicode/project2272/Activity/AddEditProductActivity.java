@@ -1,11 +1,20 @@
 package org.meicode.project2272.Activity;
-
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
 import com.google.android.material.chip.Chip;
 
 import org.meicode.project2272.Model.ItemsModel;
@@ -15,7 +24,7 @@ import org.meicode.project2272.databinding.ActivityAddEditProductBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import android.util.Log;
+import java.util.Map;
 
 public class AddEditProductActivity extends AppCompatActivity {
 
@@ -23,7 +32,21 @@ public class AddEditProductActivity extends AppCompatActivity {
     private MainRespository respository;
     private ItemsModel existingProduct = null;
     private String productKey = null;
-    private static final String TAG = "AddEditProductActivity_Debug";
+    private Uri imageUri;
+    private String uploadedImageUrl = null; // Biến lưu URL ảnh đã tải lên
+    private ProgressDialog progressDialog;
+
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    imageUri = result.getData().getData();
+                    // Hiển thị ảnh đã chọn và bắt đầu tải lên
+                    Glide.with(this).load(imageUri).into(binding.productImageView);
+                    uploadToCloudinary();
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,21 +55,25 @@ public class AddEditProductActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         respository = new MainRespository();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Đang tải ảnh lên...");
 
-        // 1. Khởi tạo Spinner
         setupSizeSpinner();
 
-        // 2. Kiểm tra nếu là chế độ "Sửa" thì điền dữ liệu cũ
         if (getIntent().hasExtra("product")) {
             existingProduct = (ItemsModel) getIntent().getSerializableExtra("product");
             productKey = existingProduct.getKey();
             populateData();
         }
 
-        // 3. Xử lý sự kiện khi nhấn nút "Lưu"
-        binding.btnSave.setOnClickListener(v -> saveProduct());
+        // Mở thư viện ảnh khi nhấn nút
+        binding.btnSelectImage.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            activityResultLauncher.launch(intent);
+        });
 
-        // 4. Xử lý sự kiện khi nhấn nút "Thêm" size
+        binding.btnSave.setOnClickListener(v -> saveProduct());
         binding.btnAddSize.setOnClickListener(v -> {
             String selectedSize = binding.spinnerSize.getSelectedItem().toString();
             if (!isSizeAlreadyAdded(selectedSize)) {
@@ -55,6 +82,39 @@ public class AddEditProductActivity extends AppCompatActivity {
                 Toast.makeText(this, "Size đã được thêm", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void uploadToCloudinary() {
+        if (imageUri == null) return;
+        progressDialog.show();
+
+        MediaManager.get().upload(imageUri).callback(new UploadCallback() {
+            @Override
+            public void onStart(String requestId) {
+                Log.d("CLOUDINARY_UPLOAD", "Bắt đầu tải lên...");
+            }
+
+            @Override
+            public void onProgress(String requestId, long bytes, long totalBytes) {}
+
+            @Override
+            public void onSuccess(String requestId, Map resultData) {
+                progressDialog.dismiss();
+                uploadedImageUrl = (String) resultData.get("secure_url");
+                Toast.makeText(AddEditProductActivity.this, "Tải ảnh thành công!", Toast.LENGTH_SHORT).show();
+                Log.d("CLOUDINARY_UPLOAD", "URL: " + uploadedImageUrl);
+            }
+
+            @Override
+            public void onError(String requestId, ErrorInfo error) {
+                progressDialog.dismiss();
+                Toast.makeText(AddEditProductActivity.this, "Tải ảnh thất bại: " + error.getDescription(), Toast.LENGTH_LONG).show();
+                Log.e("CLOUDINARY_UPLOAD", "Lỗi: " + error.getDescription());
+            }
+
+            @Override
+            public void onReschedule(String requestId, ErrorInfo error) {}
+        }).dispatch();
     }
 
     private void setupSizeSpinner() {
@@ -90,8 +150,8 @@ public class AddEditProductActivity extends AppCompatActivity {
         binding.edtOldPrice.setText(String.valueOf(existingProduct.getOldPrice()));
         binding.edtOffPercent.setText(existingProduct.getOffPercent());
 
-        if (existingProduct.getPicUrl() != null) {
-            binding.edtPicUrl.setText(String.join(",", existingProduct.getPicUrl()));
+        if (existingProduct.getPicUrl() != null && !existingProduct.getPicUrl().isEmpty()) {
+            Glide.with(this).load(existingProduct.getPicUrl().get(0)).into(binding.productImageView);
         }
 
         // Sửa lỗi: Lấy danh sách size và thêm vào ChipGroup
@@ -103,28 +163,23 @@ public class AddEditProductActivity extends AppCompatActivity {
     }
 
     private void saveProduct() {
+        if (uploadedImageUrl == null && existingProduct == null) {
+            Toast.makeText(this, "Vui lòng chọn và đợi tải ảnh lên hoàn tất", Toast.LENGTH_SHORT).show();
+            return;
+        }
         // Lấy dữ liệu từ các trường nhập liệu
         String title = binding.edtTitle.getText().toString().trim();
         String description = binding.edtDescription.getText().toString().trim();
         String priceStr = binding.edtPrice.getText().toString().trim();
         String oldPriceStr = binding.edtOldPrice.getText().toString().trim();
         String offPercent = binding.edtOffPercent.getText().toString().trim();
-        String picUrlStr = binding.edtPicUrl.getText().toString().trim();
 
-        // Kiểm tra các trường bắt buộc
-        if (title.isEmpty() || priceStr.isEmpty() || picUrlStr.isEmpty()) {
-            Toast.makeText(this, "Vui lòng điền các trường bắt buộc", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // *** PHẦN QUAN TRỌNG NHẤT: LẤY SIZE TỪ CHIPGROUP ***
-        // Vòng lặp này sẽ lấy tất cả các size bạn đã thêm vào giao diện
         ArrayList<String> sizes = new ArrayList<>();
         for (int i = 0; i < binding.sizeChipGroup.getChildCount(); i++) {
             Chip chip = (Chip) binding.sizeChipGroup.getChildAt(i);
             sizes.add(chip.getText().toString());
         }
-        Log.d(TAG, "Danh sách size lấy từ ChipGroup: " + sizes.toString());
+
 
         // Tạo đối tượng sản phẩm mới
         ItemsModel product = new ItemsModel();
@@ -133,32 +188,42 @@ public class AddEditProductActivity extends AppCompatActivity {
         product.setPrice(Integer.parseInt(priceStr));
         product.setOldPrice(oldPriceStr.isEmpty() ? 0 : Integer.parseInt(oldPriceStr));
         product.setOffPercent(offPercent);
-        product.setPicUrl(new ArrayList<>(Arrays.asList(picUrlStr.split(","))));
-
-        // *** GÁN DANH SÁCH SIZE ĐÚNG VÀO SẢN PHẨM ***
         product.setSize(sizes);
-
-        // Gán các giá trị mặc định khác nếu cần
         product.setColor(new ArrayList<>(Arrays.asList("#FF5733", "#33FF57")));
-        Log.d(TAG, "Size trong đối tượng Product trước khi lưu: " + product.getSize().toString());
 
-        // Lưu sản phẩm lên Firebase
-        if (productKey != null) { // Chế độ sửa
+
+        ArrayList<String> finalPicUrls = new ArrayList<>();
+        if (uploadedImageUrl != null) {
+            finalPicUrls.add(uploadedImageUrl);
+        } else if (existingProduct != null && existingProduct.getPicUrl() != null) {
+            finalPicUrls.addAll(existingProduct.getPicUrl());
+        }
+        product.setPicUrl(finalPicUrls);
+
+
+        // Lưu sản phẩm lên Firebase (logic không đổi)
+        if (productKey != null) {
+            // TRƯỜNG HỢP 1: SỬA SẢN PHẨM ĐÃ CÓ
             respository.updateProduct(productKey, product).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    Toast.makeText(this, "Cập nhật sản phẩm thành công!", Toast.LENGTH_SHORT).show();
+                    // Nếu thành công, thông báo và đóng màn hình hiện tại
+                    Toast.makeText(AddEditProductActivity.this, "Cập nhật sản phẩm thành công!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    Toast.makeText(this, "Cập nhật thất bại!", Toast.LENGTH_SHORT).show();
+                    // Nếu thất bại, chỉ thông báo lỗi
+                    Toast.makeText(AddEditProductActivity.this, "Cập nhật thất bại!", Toast.LENGTH_SHORT).show();
                 }
             });
-        } else { // Chế độ thêm mới
+        } else {
+            // TRƯỜNG HỢP 2: THÊM SẢN PHẨM MỚI
             respository.addProduct(product).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    Toast.makeText(this, "Thêm sản phẩm thành công!", Toast.LENGTH_SHORT).show();
+                    // Nếu thành công, thông báo và đóng màn hình hiện tại
+                    Toast.makeText(AddEditProductActivity.this, "Thêm sản phẩm thành công!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    Toast.makeText(this, "Thêm thất bại!", Toast.LENGTH_SHORT).show();
+                    // Nếu thất bại, chỉ thông báo lỗi
+                    Toast.makeText(AddEditProductActivity.this, "Thêm thất bại!", Toast.LENGTH_SHORT).show();
                 }
             });
         }

@@ -55,6 +55,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.6")
     //Thư viện tạo thanh điều hướng dạng "chip" đẹp mắt, thay thế BottomNavigationView mặc định của Android
     implementation("com.github.ismaeldivita:chip-navigation-bar:1.4.0")
+    implementation("com.cloudinary:cloudinary-android:2.4.0")
 
 
 }

@@ -63,13 +63,31 @@
             android:inputType="text"
             android:layout_marginBottom="12dp"/>
 
-        <EditText
-            android:id="@+id/edtPicUrl"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="URL ảnh (cách nhau bởi dấu phẩy)"
-            android:inputType="text"
-            android:layout_marginBottom="24dp"/>
+            android:text="Ảnh sản phẩm"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <ImageView
+            android:id="@+id/productImageView"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/grey_bg" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectImage"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:text="Chọn ảnh" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
