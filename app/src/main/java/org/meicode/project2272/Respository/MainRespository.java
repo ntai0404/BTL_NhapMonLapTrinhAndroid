@@ -15,9 +15,12 @@ import java.util.ArrayList;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.DatabaseError;
+import com.google.android.gms.tasks.Task;
+
 
 public class MainRespository {
     private final FirebaseDatabase  firebaseDatabase= FirebaseDatabase.getInstance();
+    private final DatabaseReference itemsRef = firebaseDatabase.getReference("Items");
 
     //Login 4 User >.<
     //load User uses the same way >.<
@@ -40,6 +43,7 @@ public class MainRespository {
             @Override
             public void onCancelled(@NonNull DatabaseError error){
             }
+
         });return listData;
     }
 
@@ -90,43 +94,43 @@ public class MainRespository {
     //Items Popular
 // Phương thức trả về dữ liệu dạng LiveData để có thể quan sát được từ UI
     public LiveData<ArrayList<ItemsModel>> loadPopular() {
-        // Tạo một MutableLiveData để chứa danh sách các ItemsModel
         MutableLiveData<ArrayList<ItemsModel>> listData = new MutableLiveData<>();
-
-        // Tham chiếu tới node "Items" trong Firebase Realtime Database
-        DatabaseReference ref = firebaseDatabase.getReference("Items");
-
-        // Lắng nghe dữ liệu từ node "Items"
-        ref.addValueEventListener(new ValueEventListener() {
-
-            // Khi dữ liệu thay đổi hoặc lần đầu load
+        itemsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Tạo danh sách để chứa các đối tượng ItemsModel
                 ArrayList<ItemsModel> list = new ArrayList<>();
-
-                // Duyệt qua tất cả các phần tử con trong snapshot
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                    // Chuyển đổi dữ liệu snapshot con thành đối tượng ItemsModel
                     ItemsModel item = childSnapshot.getValue(ItemsModel.class);
-                    // Nếu item không null thì thêm vào danh sách
-                    if (item != null) list.add(item);
+                    if (item != null) {
+                        item.setKey(childSnapshot.getKey()); // Gán key vào đối tượng
+                        list.add(item);
+                    }
                 }
-
-                // Gán danh sách vào LiveData để cập nhật cho UI
                 listData.setValue(list);
             }
 
-            // Hàm xử lý khi có lỗi truy cập dữ liệu từ Firebase
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // nahhhhhhhh >.<
+                // Xử lý lỗi
             }
         });
-        // Trả về đối tượng LiveData để UI có thể quan sát dữ liệu
         return listData;
     }
+    // Phương thức thêm sản phẩm mới
+    public Task<Void> addProduct(ItemsModel item) {
+        String key = itemsRef.push().getKey(); // Tạo một key duy nhất
+        return itemsRef.child(key).setValue(item);
+    }
 
+    // Phương thức cập nhật sản phẩm
+    public Task<Void> updateProduct(String key, ItemsModel item) {
+        return itemsRef.child(key).setValue(item);
+    }
+
+    // Phương thức xóa sản phẩm
+    public Task<Void> deleteProduct(String key) {
+        return itemsRef.child(key).removeValue();
+    }
 
 
 }

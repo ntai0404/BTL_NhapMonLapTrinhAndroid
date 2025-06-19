@@ -1,9 +1,13 @@
 package org.meicode.project2272.Model;
 
+import com.google.firebase.database.Exclude;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+// LỚP POJO (Plain Old Java Object) CHUẨN CHO FIREBASE
 public class ItemsModel implements Serializable {
+
+    // 1. Các trường phải là private
     private String title;
     private String description;
     private String offPercent;
@@ -15,17 +19,13 @@ public class ItemsModel implements Serializable {
     private int review;
     private double rating;
     private int NumberinCart;
+    private String key;
 
-    public ItemsModel() {}
-
-    public ArrayList<String> getColor() {
-        return color;
+    // 2. Phải có một constructor rỗng và public
+    public ItemsModel() {
     }
 
-    public void setColor(ArrayList<String> color) {
-        this.color = color;
-    }
-
+    // 3. Tất cả các trường cần lưu phải có getter và setter public
     public String getTitle() {
         return title;
     }
@@ -56,6 +56,14 @@ public class ItemsModel implements Serializable {
 
     public void setSize(ArrayList<String> size) {
         this.size = size;
+    }
+
+    public ArrayList<String> getColor() {
+        return color;
+    }
+
+    public void setColor(ArrayList<String> color) {
+        this.color = color;
     }
 
     public ArrayList<String> getPicUrl() {
@@ -98,12 +106,22 @@ public class ItemsModel implements Serializable {
         this.rating = rating;
     }
 
+
     public int getNumberinCart() {
         return NumberinCart;
     }
 
-    public void setNumberinCart(int numberInCart) {
-        NumberinCart = numberInCart;
+    public void setNumberinCart(int numberinCart) {
+        this.NumberinCart = numberinCart;
+    }
+
+    // Dùng @Exclude để Firebase không lưu trường này vào database
+    @Exclude
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }
-
