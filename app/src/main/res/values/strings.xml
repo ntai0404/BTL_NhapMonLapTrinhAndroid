@@ -45,6 +45,15 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="dktk">Đăng ký tài khoản</string>
+    <string name="vld">Vui lòng điền đầy đủ thông tin để tạo tài khoản mới.</string>
+    <string name="dn">Tên đăng nhập</string>
+    <string name="mk">Mật khẩu</string>
+    <string name="email">Email</string>
+    <string name="sdt">Số điện thoại</string>
+    <string name="dc">Địa chỉ</string>
+    <string name="dk">Đăng ký</string>
+    <string name="dctk">Bạn đã có tài khoản? Đăng nhập ngay!</string>
 
     <string-array name="common_sizes">
         <item>S</item>
