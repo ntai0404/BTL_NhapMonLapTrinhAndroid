@@ -34,6 +34,7 @@ public class ForgotActivity extends AppCompatActivity {
     private DatabaseReference databaseRef;
     private static final String TAG = "ForgotActivity";
     private static final String USERS_NODE = "User";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +53,7 @@ public class ForgotActivity extends AppCompatActivity {
         btnSendResetLink.setOnClickListener(v -> sendResetLink());
         if (tvBackToLogin != null) {
             tvBackToLogin.setOnClickListener(v -> {
-                Intent intent = new Intent(ForgotActivity.this, SplashActivity.class);
+                Intent intent = new Intent(ForgotActivity.this, SplashActivity.class); // Vẫn giữ quay lại Splash (màn hình đăng nhập)
                 startActivity(intent);
                 finish();
             });
@@ -68,21 +69,36 @@ public class ForgotActivity extends AppCompatActivity {
             etForgotEmail.setError("Email không hợp lệ!");
             return;
         }
+
         Query emailQuery = databaseRef.child(USERS_NODE).orderByChild("email").equalTo(email);
         emailQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    Toast.makeText(ForgotActivity.this, "Đã gửi hướng dẫn khôi phục mật khẩu đến email của bạn.", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(ForgotActivity.this, SplashActivity.class);
-                    startActivity(intent);
-                    finish();
+                    String userUid = null;
+                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                        userUid = userSnapshot.getKey();
+                        break;
+                    }
+                    if (userUid != null) {
+                        Toast.makeText(ForgotActivity.this, "Đã tìm thấy tài khoản. Chuyển hướng để đặt lại mật khẩu.", Toast.LENGTH_LONG).show();
+
+                        // Chuyển sang RepwActivity và truyền UID của người dùng
+                        Intent intent = new Intent(ForgotActivity.this, RepwActivity.class);
+                        intent.putExtra("USER_UID", userUid); // Truyền UID qua Intent
+                        startActivity(intent);
+                        finish(); // Đóng ForgotActivity
+                    } else {
+                        Log.e(TAG, "User found by email but UID is null. Data structure might be unexpected.");
+                        Toast.makeText(ForgotActivity.this, "Lỗi: Không thể xác định tài khoản người dùng.", Toast.LENGTH_LONG).show();
+                    }
 
                 } else {
                     Toast.makeText(ForgotActivity.this, "Không tìm thấy tài khoản với email này.", Toast.LENGTH_LONG).show();
                     etForgotEmail.setError("Email không tồn tại.");
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Database error during email lookup: " + error.getMessage());
