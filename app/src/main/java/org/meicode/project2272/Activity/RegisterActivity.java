@@ -2,12 +2,12 @@ package org.meicode.project2272.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils; // Để kiểm tra chuỗi rỗng
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView; // Nếu tvLoginLink là TextView
+import android.widget.TextView;
 import android.widget.Toast;
-import android.util.Log; // Để ghi log debug
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -20,10 +20,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query; // Cần cho truy vấn
-import com.google.firebase.database.DataSnapshot; // Cần cho kết quả truy vấn
-import com.google.firebase.database.DatabaseError; // Cần cho lỗi truy vấn
-import com.google.firebase.database.ValueEventListener; // Cần cho lắng nghe sự kiện
+import com.google.firebase.database.Query;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import org.meicode.project2272.R;
 
@@ -44,8 +44,6 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
-
-        // Khởi tạo Realtime Database
         databaseRef = FirebaseDatabase.getInstance().getReference();
         // Ánh xạ các View từ layout
         etUsername = findViewById(R.id.etUsername);
@@ -145,9 +143,9 @@ public class RegisterActivity extends AppCompatActivity {
     private void saveNewUser(String username, String email, String password, String phoneNumber, String address) {
         String uid = UUID.randomUUID().toString(); // Sử dụng UUID để tạo ID duy nhất
         Map<String, Object> user = new HashMap<>();
-        user.put("uid", uid); // Lưu UID vào trong tài liệu người dùng (theo cấu trúc bạn muốn)
+        user.put("uid", uid);
         user.put("username", username);
-        user.put("password", password); // CẢNH BÁO: MẬT KHẨU LƯU DƯỚI DẠNG PLAIN TEXT LÀ KHÔNG AN TOÀN!
+        user.put("password", password);
         user.put("email", email);
         user.put("phone", phoneNumber);
         user.put("address", address);
