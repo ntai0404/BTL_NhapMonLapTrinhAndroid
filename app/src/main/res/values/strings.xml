@@ -59,6 +59,7 @@
     <string name="emailcb">Email của bạn</string>
     <string name="gui">Gửi</string>
     <string name="qldn">Quay lại Đăng nhập</string>
+    <string name="forgot_password">Forgot <font color="#3F51B5">Password</font></string>
 
     <string-array name="common_sizes">
         <item>S</item>

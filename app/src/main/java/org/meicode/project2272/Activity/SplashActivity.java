@@ -3,6 +3,7 @@ package org.meicode.project2272.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.content.Intent;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -17,7 +18,6 @@ import java.util.ArrayList;
 public class SplashActivity extends AppCompatActivity {
     private MainViewModel viewModel;
     private ActivitySplashBinding binding;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +62,14 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 }
             });
+        });
+        binding.textView3.setOnClickListener(v -> {
+            Intent intent = new Intent(SplashActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
+        binding.textView4.setOnClickListener(v -> {
+            Intent intent = new Intent(SplashActivity.this, ForgotActivity.class);
+            startActivity(intent);
         });
     }
 }
