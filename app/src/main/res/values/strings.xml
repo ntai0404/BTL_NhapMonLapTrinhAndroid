@@ -54,6 +54,11 @@
     <string name="dc">Địa chỉ</string>
     <string name="dk">Đăng ký</string>
     <string name="dctk">Bạn đã có tài khoản? Đăng nhập ngay!</string>
+    <string name="qmk">Quên mật khẩu?</string>
+    <string name="vlnm">Vui lòng nhập địa chỉ email bạn đã đăng ký để nhận hướng dẫn đặt lại mật khẩu.</string>
+    <string name="emailcb">Email của bạn</string>
+    <string name="gui">Gửi</string>
+    <string name="qldn">Quay lại Đăng nhập</string>
 
     <string-array name="common_sizes">
         <item>S</item>
