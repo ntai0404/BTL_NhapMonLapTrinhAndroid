@@ -33,8 +33,7 @@ public class ForgotActivity extends AppCompatActivity {
 
     private DatabaseReference databaseRef;
     private static final String TAG = "ForgotActivity";
-    private static final String USERS_NODE = "User"; // Đảm bảo khớp với node lưu user trong Realtime Database
-
+    private static final String USERS_NODE = "User";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +52,7 @@ public class ForgotActivity extends AppCompatActivity {
         btnSendResetLink.setOnClickListener(v -> sendResetLink());
         if (tvBackToLogin != null) {
             tvBackToLogin.setOnClickListener(v -> {
-                Intent intent = new Intent(ForgotActivity.this, SplashActivity.class); // Hoặc LoginActivity nếu đó là màn hình đăng nhập chính
+                Intent intent = new Intent(ForgotActivity.this, SplashActivity.class);
                 startActivity(intent);
                 finish();
             });
