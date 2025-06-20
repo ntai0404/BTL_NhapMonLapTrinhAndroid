@@ -60,6 +60,12 @@
     <string name="gui">Gửi</string>
     <string name="qldn">Quay lại Đăng nhập</string>
     <string name="forgot_password">Forgot <font color="#3F51B5">Password</font></string>
+    <string name="dkmk">Đặt lại mật khẩu</string>
+    <string name="vlnmmk">Vui lòng nhập mật khẩu mới của bạn.</string>
+    <string name="mkm">Mật khẩu mới</string>
+    <string name="nlmkm">Nhập lại mật khẩu mới</string>
+    <string name="drlmk">Đặt lại mật khẩu</string>
+
 
     <string-array name="common_sizes">
         <item>S</item>
