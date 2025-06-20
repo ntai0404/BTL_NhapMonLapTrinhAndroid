@@ -1,21 +1,26 @@
-// File: app/src/main/java/org/meicode/project2272/Model/ItemInBillModel.java
 package org.meicode.project2272.Model;
 
-public class ItemInBillModel {
-    private int itemId;
+import java.io.Serializable;
+
+// ItemInBillModel cũng cần implement Serializable
+public class ItemInBillModel implements Serializable {
+    private String itemId; // Dùng String để khớp với ID của sản phẩm
     private String title;
-    private double priceAtPurchase;
+    private double priceAtPurchase; // Giá tại thời điểm mua
     private int quantity;
     private String picUrl;
 
+    // Constructor rỗng bắt buộc cho Firebase
     public ItemInBillModel() {
     }
 
-    public int getItemId() {
+    // --- Getters và Setters ---
+
+    public String getItemId() {
         return itemId;
     }
 
-    public void setItemId(int itemId) {
+    public void setItemId(String itemId) {
         this.itemId = itemId;
     }
 
@@ -51,3 +56,4 @@ public class ItemInBillModel {
         this.picUrl = picUrl;
     }
 }
+
