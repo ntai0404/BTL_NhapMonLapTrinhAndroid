@@ -44,9 +44,6 @@
             android:name=".Activity.AdminMainActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.AdminStatsActivity"
-            android:exported="false" />
-        <activity
             android:name=".Activity.CartActivity"
             android:exported="false" />
         <activity
