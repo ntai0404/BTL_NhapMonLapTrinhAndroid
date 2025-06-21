@@ -1,5 +1,6 @@
 package org.meicode.project2272.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     private MainViewModel viewModel;
     private CartAdapter cartAdapter;
     private UserModel currentUser;
+    private double totalAmount = 0; // Biến để lưu tổng tiền
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,10 +34,25 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
 
     private void setVariables() {
         binding.backBtn.setOnClickListener(v -> finish());
+
+        // Thêm sự kiện cho nút thanh toán
+        // Giả sử bạn có một nút checkoutBtn trong layout activity_cart.xml
+        binding.checkoutBtn.setOnClickListener(v -> {
+            if (cartAdapter.listItemSelected == null || cartAdapter.listItemSelected.isEmpty()) {
+                return;
+            }
+            Intent intent = new Intent(CartActivity.this, OrderActivity.class);
+            intent.putExtra("user", currentUser);
+            intent.putExtra("cartItems", cartAdapter.listItemSelected);
+            intent.putExtra("totalAmount", this.totalAmount);
+            startActivity(intent);
+        });
     }
 
     private void initCartList() {
         binding.cartView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        binding.checkoutBtn.setVisibility(View.GONE); // Ẩn ban đầu
+
         cartAdapter = new CartAdapter(new ArrayList<>(), this);
         binding.cartView.setAdapter(cartAdapter);
 
@@ -44,9 +61,11 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
                 if (itemsInCart == null || itemsInCart.isEmpty()) {
                     binding.emptyTxt.setVisibility(View.VISIBLE);
                     binding.scrollView3.setVisibility(View.GONE);
+                    binding.checkoutBtn.setVisibility(View.GONE);
                 } else {
                     binding.emptyTxt.setVisibility(View.GONE);
                     binding.scrollView3.setVisibility(View.VISIBLE);
+                    binding.checkoutBtn.setVisibility(View.VISIBLE);
                 }
 
                 cartAdapter.listItemSelected = itemsInCart;
@@ -58,9 +77,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
 
 
     private void calculatorCart(ArrayList<ItemsModel> items) {
-        // Tạo đối tượng định dạng tiền tệ
         java.text.NumberFormat currencyFormatter = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
-
         double percentTax = 0.02;
         double delivery = 30000;
         double itemTotal = 0;
@@ -71,15 +88,13 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
             }
         }
 
-        double tax = Math.round(itemTotal * percentTax * 100.0) / 100.0;
-        double total = Math.round((itemTotal + tax + delivery) * 100.0) / 100.0;
-        itemTotal = Math.round(itemTotal * 100.0) / 100.0;
+        double tax = itemTotal * percentTax;
+        this.totalAmount = itemTotal + tax + delivery;
 
-        // Sử dụng đối tượng định dạng để hiển thị giá trị cuối cùng
         binding.totalFeeTxt.setText(currencyFormatter.format(itemTotal));
         binding.taxTxt.setText(currencyFormatter.format(tax));
         binding.deliveryTxt.setText(currencyFormatter.format(delivery));
-        binding.totalTxt.setText(currencyFormatter.format(total));
+        binding.totalTxt.setText(currencyFormatter.format(this.totalAmount));
     }
 
     @Override

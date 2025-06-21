@@ -3,6 +3,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import org.meicode.project2272.Model.BannerModel;
+import org.meicode.project2272.Model.BillModel;
 import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.NotificationModel;
@@ -329,5 +330,53 @@ public class MainRespository {
     }
     // --- KẾT THÚC CẬP NHẬT CHO TÌM KIẾM SẢN PHẨM KH ---
 
+    // --- LOGIC MỚI CHO ĐẶT HÀNG ---
+    public LiveData<Boolean> placeOrderAndCreateNotification(BillModel bill) {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+        DatabaseReference billsRef = firebaseDatabase.getReference("Bills");
+        String billId = billsRef.push().getKey();
+
+        if (billId == null) {
+            result.postValue(false);
+            return result;
+        }
+
+        bill.setBillId(billId);
+        billsRef.child(billId).setValue(bill).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // Tạo thông báo trong app sau khi tạo bill thành công
+                String notificationContent = "Đơn hàng #" + billId.substring(Math.max(0, billId.length() - 6)) + " của bạn đã được tạo thành công.";
+                createInAppNotification(bill.getUserId(), notificationContent);
+                result.postValue(true);
+            } else {
+                result.postValue(false);
+            }
+        });
+
+        return result;
+    }
+
+    // Hàm tạo thông báo trong app (lưu vào Realtime Database)
+    private void createInAppNotification(String userId, String content) {
+        if (userId == null) return;
+        DatabaseReference notifRef = firebaseDatabase.getReference("Notifications").child(userId);
+        String notificationId = notifRef.push().getKey();
+        if (notificationId == null) return;
+
+        NotificationModel notification = new NotificationModel();
+        notification.setNotificationId(notificationId);
+        notification.setUserId(userId);
+        notification.setContent(content);
+        notification.setRead(false);
+
+        notifRef.child(notificationId).setValue(notification);
+    }
+
+    public void clearCart(String userId) {
+        if (userId == null) return;
+        DatabaseReference cartRef = firebaseDatabase.getReference("Carts").child(userId);
+        cartRef.removeValue();
+    }
+    // --- KẾT THÚC LOGIC MỚI ---
 
 }

@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import com.google.firebase.database.ValueEventListener;
 
 import org.meicode.project2272.Model.BannerModel;
+import org.meicode.project2272.Model.BillModel;
 import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.NotificationModel;
@@ -131,6 +132,15 @@ public class MainViewModel extends ViewModel {
         return respository.searchProducts(keyword);
     }
 
+    // --- LOGIC MỚI CHO ĐẶT HÀNG ---
+    public LiveData<Boolean> placeOrderAndCreateNotification(BillModel bill) {
+        return respository.placeOrderAndCreateNotification(bill);
+    }
+
+    public void clearCart(String userId) {
+        respository.clearCart(userId);
+    }
+    // --- KẾT THÚC LOGIC MỚI ---
 
 }
 

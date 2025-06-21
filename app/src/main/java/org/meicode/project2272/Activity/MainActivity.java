@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // SỬA 3: Tối ưu hóa initPopular
+    //  Tối ưu hóa initPopular
     private void initPopular() {
         binding.progressBarPopular.setVisibility(View.VISIBLE);
         // Khởi tạo Adapter một lần duy nhất
