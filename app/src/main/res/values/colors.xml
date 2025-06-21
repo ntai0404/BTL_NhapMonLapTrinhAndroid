@@ -9,4 +9,8 @@
     <color name="orange">#FFDC6F31</color>
     <color name="red">#FFFF0000</color>
     //them các màu khác
+    <color name="colorPrimary">#3F51B5</color> <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="background_light_gray">#F5F5F5</color> <color name="text_dark">#212121</color>
+    <color name="text_light">#757575</color>
 </resources>
