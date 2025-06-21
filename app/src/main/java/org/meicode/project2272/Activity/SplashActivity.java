@@ -63,5 +63,14 @@ public class SplashActivity extends AppCompatActivity {
                 }
             });
         });
+        binding.textView3.setOnClickListener(v -> {
+            Intent intent = new Intent(SplashActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
+        binding.textView4.setOnClickListener(v -> {
+            Intent intent = new Intent(SplashActivity.this, ForgotActivity.class);
+            startActivity(intent);
+        });
+
     }
 }

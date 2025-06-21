@@ -17,20 +17,22 @@ import com.bumptech.glide.load.resource.bitmap.CenterInside;
 import com.bumptech.glide.request.RequestOptions;
 
 import org.meicode.project2272.Model.ItemsModel;
+import org.meicode.project2272.Model.UserModel;
 import org.meicode.project2272.databinding.ViewholderPopularBinding;
 import org.meicode.project2272.Activity.DetailActivity;
 
 public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHolder> {
 
-    // Danh sách dữ liệu sản phẩm
     private ArrayList<ItemsModel> items;
 
     // Ngữ cảnh (context) để khởi tạo view hoặc gọi activity
     private Context context;
+    private UserModel currentUser;
 
     // Constructor nhận dữ liệu truyền vào từ bên ngoài
-    public PopularAdapter(ArrayList<ItemsModel> items) {
+    public PopularAdapter(ArrayList<ItemsModel> items, UserModel user) {
         this.items = items;
+        this.currentUser = user;
     }
 
     // Hàm tạo ViewHolder từ layout viewholder_popular.xml
@@ -45,12 +47,16 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
     // Gắn dữ liệu từng item vào ViewHolder
     @Override
     public void onBindViewHolder(@NonNull PopularAdapter.ViewHolder holder, int position) {
+        // Ngữ cảnh (context) để khởi tạo view hoặc gọi activity
+        context = holder.itemView.getContext();
+        // Tạo đối tượng định dạng tiền tệ
+        java.text.NumberFormat currencyFormatter = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
 
         // Gắn tiêu đề
         holder.binding.titleTxt.setText(items.get(position).getTitle());
 
-        // Gắn giá hiện tại
-        holder.binding.priceTxt.setText("$" + items.get(position).getPrice());
+        // Gắn giá hiện tại đã được định dạng
+        holder.binding.priceTxt.setText(currencyFormatter.format(items.get(position).getPrice()));
 
         // Gắn điểm đánh giá
         holder.binding.ratingTxt.setText("(" + items.get(position).getRating() + ")");
@@ -58,8 +64,8 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
         // Gắn phần trăm giảm giá
         holder.binding.offPercentTxt.setText(items.get(position).getOffPercent() + " Off");
 
-        // Gắn giá cũ và gạch ngang
-        holder.binding.oldPriceTxt.setText("$" + items.get(position).getOldPrice());
+        // Gắn giá cũ đã được định dạng và gạch ngang
+        holder.binding.oldPriceTxt.setText(currencyFormatter.format(items.get(position).getOldPrice()));
         holder.binding.oldPriceTxt.setPaintFlags(holder.binding.oldPriceTxt.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
         // Hiển thị ảnh sản phẩm bằng Glide
@@ -71,17 +77,12 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
 
         // Bắt sự kiện click: khi người dùng nhấn vào item
         holder.itemView.setOnClickListener(v -> {
-            // Tạo Intent để chuyển sang DetailActivity
             Intent intent = new Intent(context, DetailActivity.class);
-
-            // Truyền đối tượng sản phẩm sang activity mới
             intent.putExtra("object", items.get(position));
-
-            // Bắt đầu activity
+            intent.putExtra("user", currentUser); // Truyền UserModel sang DetailActivity
             context.startActivity(intent);
         });
     }
-
     // Trả về tổng số phần tử trong danh sách
     @Override
     public int getItemCount() {

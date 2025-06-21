@@ -1,68 +1,66 @@
 package org.meicode.project2272.Adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import java.util.ArrayList;
-import org.meicode.project2272.Model.ItemsModel;
-import org.meicode.project2272.Helper.ChangeNumberItemsListener;
-import org.meicode.project2272.Helper.ManagmentCart;
-import org.meicode.project2272.databinding.ViewholderCartBinding;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
-
+import org.meicode.project2272.Model.ItemsModel;
+import org.meicode.project2272.databinding.ViewholderCartBinding;
+import java.util.ArrayList;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
-    ArrayList<ItemsModel> listItemSelected;
-    ChangeNumberItemsListener changeNumberItemsListener;
-    private ManagmentCart managmentCart;
+    public ArrayList<ItemsModel> listItemSelected;
+    private CartItemListener listener;
 
-    public CartAdapter(ArrayList<ItemsModel> listItemSelected,Context context ,
-                       ChangeNumberItemsListener changeNumberItemsListener) {
+    public interface CartItemListener {
+        void onPlusClick(String itemId);
+        void onMinusClick(String itemId);
+    }
+
+    public CartAdapter(ArrayList<ItemsModel> listItemSelected, CartItemListener listener) {
         this.listItemSelected = listItemSelected;
-        this.changeNumberItemsListener = changeNumberItemsListener;
-        managmentCart = new ManagmentCart(context);
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public CartAdapter.CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ViewholderCartBinding binding = ViewholderCartBinding.inflate(LayoutInflater.
-                from(parent.getContext()), parent, false);
-
+    public CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ViewholderCartBinding binding = ViewholderCartBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
         return new CartViewHolder(binding);
     }
 
+
     @Override
-    public void onBindViewHolder(@NonNull CartAdapter.CartViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
+        ItemsModel item = listItemSelected.get(position);
+        // Tạo đối tượng định dạng tiền tệ
+        java.text.NumberFormat currencyFormatter = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
 
-        holder.binding.titleTxt.setText(listItemSelected.get(position).getTitle());
-        holder.binding.feeEachItem.setText("$" + listItemSelected.get(position).getPrice());
-        holder.binding.totalEachItem.setText("$" + Math.round((listItemSelected.get(position).getNumberinCart()
-                * listItemSelected.get(position).getPrice())));
-        holder.binding.numberItemTxt.setText(String.valueOf(listItemSelected.get(position).getNumberinCart()));
+        holder.binding.titleTxt.setText(item.getTitle());
 
-        Glide.with(holder.itemView.getContext())
-                .load(listItemSelected.get(position).getPicUrl())
-                .into(holder.binding.pic);
+        // Định dạng giá của mỗi sản phẩm
+        holder.binding.feeEachItem.setText(currencyFormatter.format(item.getPrice()));
 
-        holder.binding.plsuCartBtn.setOnClickListener(v -> managmentCart.plusItem(listItemSelected, position, () -> {
-            notifyDataSetChanged();
-            changeNumberItemsListener.changed();
-        }));
+        // Tính toán và định dạng tổng giá của mỗi loại sản phẩm
+        double totalEachItem = item.getNumberinCart() * item.getPrice();
+        holder.binding.totalEachItem.setText(currencyFormatter.format(totalEachItem));
 
-        holder.binding.minusCartBtn.setOnClickListener(v -> managmentCart.minusItem(listItemSelected, position, () -> {
-            notifyDataSetChanged();
-            changeNumberItemsListener.changed();
-        }));
+        holder.binding.numberItemTxt.setText(String.valueOf(item.getNumberinCart()));
+
+        if (item.getPicUrl() != null && !item.getPicUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(item.getPicUrl().get(0))
+                    .into(holder.binding.pic);
+        }
+
+        holder.binding.plsuCartBtn.setOnClickListener(v -> listener.onPlusClick(item.getId()));
+        holder.binding.minusCartBtn.setOnClickListener(v -> listener.onMinusClick(item.getId()));
     }
 
     @Override
     public int getItemCount() {
-        return listItemSelected.size();
+        return (listItemSelected != null) ? listItemSelected.size() : 0;
     }
 
     public class CartViewHolder extends RecyclerView.ViewHolder {

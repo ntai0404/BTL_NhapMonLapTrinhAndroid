@@ -78,7 +78,14 @@
                 android:background="@drawable/orange_bg"
                 android:textSize="18sp"
                 android:textColor="@color/white"/>
-
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Forgot Password"
+                android:textAlignment="center"
+                android:lineSpacingExtra="18sp"
+                android:layout_marginBottom="32dp"/>
             <TextView
                 android:id="@+id/textView3"
                 android:layout_width="match_parent"

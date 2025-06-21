@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="175dp"
-    android:layout_height="230dp"
+    android:layout_height="260dp"
     android:layout_margin="8dp"
     android:background="@drawable/white_bg">
 
@@ -60,19 +60,19 @@
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/titleTxt"
-        app:layout_constraintTop_toBottomOf="@+id/titleTxt" />
+        app:layout_constraintTop_toBottomOf="@+id/titleTxt"
+        app:layout_constraintVertical_bias="0.19" />
 
     <TextView
         android:id="@+id/priceTxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:text="$123"
         android:textColor="@color/red"
         android:textStyle="bold"
-        android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/oldPriceTxt"
-        app:layout_constraintStart_toEndOf="@+id/oldPriceTxt"
-        app:layout_constraintTop_toTopOf="@+id/oldPriceTxt" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/oldPriceTxt" />
 
     <ImageView
         android:id="@+id/imageView7"

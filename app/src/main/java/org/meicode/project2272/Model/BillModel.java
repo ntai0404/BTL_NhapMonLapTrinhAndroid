@@ -1,19 +1,25 @@
+
 package org.meicode.project2272.Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class BillModel {
+// BillModel cần implement Serializable để có thể truyền giữa các Activity
+public class BillModel implements Serializable {
     private String billId;
     private String userId;
     private String createdAt;
-    private ArrayList<ItemInBillModel> items;
+    private ArrayList<ItemInBillModel> items; // Danh sách các sản phẩm trong hóa đơn
     private double totalAmount;
     private String shippingAddress;
     private String paymentMethod;
     private String status;
 
+    // Constructor rỗng bắt buộc cho Firebase
     public BillModel() {
     }
+
+    // --- Getters và Setters cho tất cả các trường ---
 
     public String getBillId() {
         return billId;
