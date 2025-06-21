@@ -60,4 +60,15 @@
         <item>43</item>
         <item>44</item>
     </string-array>
+
+    <string-array name="common_colors">
+        <item>Đen</item>
+        <item>Trắng</item>
+        <item>Đỏ</item>
+        <item>Xanh Dương</item>
+        <item>Vàng</item>
+        <item>Xám</item>
+        <item>Nâu</item>
+        <item>Be</item>
+    </string-array>
 </resources>

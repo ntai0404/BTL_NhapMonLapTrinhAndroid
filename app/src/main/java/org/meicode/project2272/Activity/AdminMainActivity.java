@@ -1,14 +1,12 @@
 package org.meicode.project2272.Activity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import org.meicode.project2272.R;
 import org.meicode.project2272.databinding.ActivityAdminMainBinding;
-import android.content.Intent;
 
 public class AdminMainActivity extends AppCompatActivity {
     private ActivityAdminMainBinding binding;
@@ -17,29 +15,41 @@ public class AdminMainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityAdminMainBinding.inflate(getLayoutInflater());
+        // Sửa id của view trong binding cho khớp với layout mới
         setContentView(binding.getRoot());
 
-        // Tạm thời chỉ triển khai Quản lý sản phẩm
-        binding.btnManageProducts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Khởi chạy Activity quản lý sản phẩm
-                startActivity(new Intent(AdminMainActivity.this, ManageProductsActivity.class));
-            }
-        });
+        // Đặt Fragment mặc định
+        if (savedInstanceState == null) {
+            replaceFragment(new AdminProductsFragment());
+            binding.bottomNavigation.setSelectedItemId(R.id.nav_admin_products);
+        }
 
-        binding.btnManageCategories.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(AdminMainActivity.this, "Chức năng sẽ được triển khai!", Toast.LENGTH_SHORT).show();
-            }
-        });
+        binding.bottomNavigation.setOnItemSelectedListener(item -> {
+            Fragment selectedFragment = null;
+            int itemId = item.getItemId();
 
-        binding.btnManageUsers.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(AdminMainActivity.this, "Chức năng sẽ được triển khai!", Toast.LENGTH_SHORT).show();
+            if (itemId == R.id.nav_admin_products) {
+                selectedFragment = new AdminProductsFragment();
+            } else if (itemId == R.id.nav_admin_orders) {
+                // selectedFragment = new AdminOrdersFragment();
+            } else if (itemId == R.id.nav_admin_stats) {
+                // selectedFragment = new AdminStatsFragment();
+            } else if (itemId == R.id.nav_admin_profile) {
+                // selectedFragment = new AdminProfileFragment();
             }
+
+            if (selectedFragment != null) {
+                replaceFragment(selectedFragment);
+            }
+
+            return true; // Quan trọng: trả về true để mục được chọn
         });
+    }
+
+    private void replaceFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        fragmentTransaction.commit();
     }
 }

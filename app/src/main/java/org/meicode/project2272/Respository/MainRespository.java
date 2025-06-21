@@ -8,6 +8,7 @@ import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.NotificationModel;
 import org.meicode.project2272.Model.UserModel;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -107,6 +108,8 @@ public class MainRespository {
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     ItemsModel item = childSnapshot.getValue(ItemsModel.class);
                     if (item != null) {
+                        // Lấy key từ Firebase và gán vào trường ID của model
+                        item.setId(childSnapshot.getKey());
                         list.add(item);
                     }
                 }
@@ -118,6 +121,29 @@ public class MainRespository {
             }
         });
         return listData;
+    }
+
+    public void addProduct(ItemsModel item) {
+        DatabaseReference ref = firebaseDatabase.getReference("Items");
+        String itemId = ref.push().getKey(); // Tạo ID duy nhất
+        if (itemId != null) {
+            item.setId(itemId);
+            ref.child(itemId).setValue(item); // Lưu sản phẩm với ID mới
+        }
+    }
+
+    // Cập nhật sản phẩm dựa trên ID
+    public void updateProduct(ItemsModel item) {
+        if (item != null && item.getId() != null) {
+            DatabaseReference ref = firebaseDatabase.getReference("Items").child(item.getId());
+            ref.setValue(item);
+        }
+    }
+
+    // Xóa sản phẩm dựa trên ID
+    public Task<Void> deleteProduct(String itemId) {
+        DatabaseReference ref = firebaseDatabase.getReference("Items").child(itemId);
+        return ref.removeValue();
     }
 
 

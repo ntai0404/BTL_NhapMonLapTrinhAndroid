@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/nav_admin_products"
+        android:icon="@drawable/btn_1"
+        android:title="Trang chủ"/>
+
+    <item
+        android:id="@+id/nav_admin_orders"
+        android:icon="@drawable/order_icon"
+        android:title="Đơn hàng"/>
+
+    <item
+        android:id="@+id/nav_admin_stats"
+        android:icon="@drawable/ic_stats"
+        android:title="Thống kê"/>
+
+    <item
+        android:id="@+id/nav_admin_profile"
+        android:icon="@drawable/btn_4"
+        android:title="Tài khoản"/>
+
 </menu>

@@ -4,6 +4,7 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ValueEventListener;
 
 import org.meicode.project2272.Model.BannerModel;
@@ -29,6 +30,18 @@ public class MainViewModel extends ViewModel {
      * Trả về LiveData danh sách danh mục (CategoryModel).
      * View sẽ observe để cập nhật khi dữ liệu thay đổi.
      */
+
+    public void addProduct(ItemsModel item) {
+        respository.addProduct(item);
+    }
+
+    public void updateProduct(ItemsModel item) {
+        respository.updateProduct(item);
+    }
+
+    public Task<Void> deleteProduct(String itemId) {
+        return respository.deleteProduct(itemId);
+    }
     public LiveData<ArrayList<UserModel>> loadUser(String input,String password,String temp){return respository.loadUser(input, password, temp);}
     public LiveData<ArrayList<CategoryModel>> loadCategory() {
         return respository.loadCategory();

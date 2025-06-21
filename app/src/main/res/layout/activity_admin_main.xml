@@ -1,42 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="16dp"
     tools:context=".Activity.AdminMainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Admin Dashboard"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation" />
 
-    <Button
-        android:id="@+id/btnManageProducts"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Quản lý sản phẩm"
-        android:layout_marginTop="8dp"/>
+        android:layout_alignParentBottom="true"
+        android:background="?android:attr/windowBackground"
+        app:menu="@menu/admin_bottom_menu" />
 
-    <Button
-        android:id="@+id/btnManageCategories"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Quản lý danh mục"
-        android:layout_marginTop="8dp"/>
-
-    <Button
-        android:id="@+id/btnManageUsers"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Quản lý người dùng"
-        android:layout_marginTop="8dp"/>
-
-</LinearLayout>
+</RelativeLayout>
