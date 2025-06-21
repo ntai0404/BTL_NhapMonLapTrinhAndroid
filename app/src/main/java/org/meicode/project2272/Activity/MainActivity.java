@@ -5,25 +5,23 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.lifecycle.ViewModelProvider; // SỬA: Import đúng
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
-import org.meicode.project2272.Adapter.CategoryAdapter;
 import org.meicode.project2272.Adapter.PopularAdapter;
 import org.meicode.project2272.Adapter.SliderAdapter;
 import org.meicode.project2272.Model.BannerModel;
-import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.UserModel;
 import org.meicode.project2272.R;
@@ -36,41 +34,38 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private MainViewModel viewModel;
     private UserModel currentUser;
+    private PopularAdapter popularAdapter; // SỬA 1: Khai báo Adapter ở cấp lớp để có thể tái sử dụng
 
-    // <<< THÊM VÀO >>>
     // Khai báo một ActivityResultLauncher để nhận kết quả trả về từ ProfileActivity
     private final ActivityResultLauncher<Intent> profileLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                // Kiểm tra xem kết quả có thành công không và có dữ liệu trả về không
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    // Lấy UserModel đã được cập nhật từ Intent trả về
                     UserModel updatedUser = (UserModel) result.getData().getSerializableExtra("updated_user");
                     if (updatedUser != null) {
-                        // Cập nhật lại biến currentUser của MainActivity.
-                        // Đây là bước quan trọng nhất để đảm bảo dữ liệu luôn mới.
                         this.currentUser = updatedUser;
+                        initUserProfile();
                     }
                 }
             }
     );
-    // <<< KẾT THÚC PHẦN THÊM VÀO >>>
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Nhận UserModel từ SplashActivity
-        currentUser = (UserModel) getIntent().getSerializableExtra("user");
-        viewModel = new MainViewModel();
+        // SỬA 2: Khởi tạo ViewModel đúng cách, theo vòng đời của Activity
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        initCategory();
+        currentUser = (UserModel) getIntent().getSerializableExtra("user");
+
+        initUserProfile();
         initBanner();
         initPopular();
         initActionListeners();
+        setupSearchFunctionality();
     }
 
 
@@ -78,21 +73,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         binding.bottomNavigation.setItemSelected(R.id.home, true);
-        // <<< THÊM VÀO >>>
-        // Gọi hàm làm mới dữ liệu người dùng mỗi khi Activity quay trở lại foreground
         refreshCurrentUser();
     }
 
-    // <<< THÊM HÀM MỚI >>>
-    /**
-     * Hàm này gọi xuống ViewModel để lấy thông tin người dùng mới nhất từ Firebase.
-     * Đây là cách đảm bảo dữ liệu luôn đúng, bất kể Activity có bị tạo lại hay không.
-     */
     private void refreshCurrentUser() {
         if (currentUser == null || currentUser.getUid() == null) {
-            return; // Không có user để làm mới
+            return;
         }
-
         viewModel.fetchUserOnce(currentUser.getUid(), new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -100,20 +87,15 @@ public class MainActivity extends AppCompatActivity {
                     for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                         UserModel updatedUser = childSnapshot.getValue(UserModel.class);
                         if (updatedUser != null) {
-                            // Cập nhật biến currentUser của MainActivity
                             MainActivity.this.currentUser = updatedUser;
-                            // Log.d("REFRESH_DEBUG", "User data refreshed from Firebase: " + updatedUser.getUsername());
+                            initUserProfile();
                             break;
                         }
                     }
                 }
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Xử lý lỗi nếu cần
-                // Log.e("REFRESH_DEBUG", "Failed to refresh user data", error.toException());
-            }
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
@@ -130,35 +112,33 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        binding.bottomNavigation.setItemSelected(R.id.home, true);
         binding.bottomNavigation.setOnItemSelectedListener(itemId -> {
-            if (itemId == R.id.home || itemId == R.id.favorites) {
-                // do nothing
-            } else if (itemId == R.id.cart) {
+            if (itemId == R.id.cart) {
                 Intent intent = new Intent(MainActivity.this, CartActivity.class);
                 intent.putExtra("user", currentUser);
                 startActivity(intent);
             } else if (itemId == R.id.profile) {
                 Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 intent.putExtra("user", currentUser);
-
-                // <<< THAY ĐỔI >>>
-                // Khởi chạy ProfileActivity bằng launcher để có thể nhận kết quả trả về.
-                // Không dùng startActivity(intent) nữa.
                 profileLauncher.launch(intent);
             }
         });
     }
 
+    // SỬA 3: Tối ưu hóa initPopular
     private void initPopular() {
         binding.progressBarPopular.setVisibility(View.VISIBLE);
+        // Khởi tạo Adapter một lần duy nhất
+        popularAdapter = new PopularAdapter(new ArrayList<>(), currentUser);
+        binding.popularView.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
+        binding.popularView.setAdapter(popularAdapter);
+        binding.popularView.setNestedScrollingEnabled(true);
+
+        // Quan sát và tải danh sách sản phẩm ban đầu
         viewModel.loadPopular().observe(this, itemsModels -> {
             if (itemsModels != null) {
-                binding.popularView.setLayoutManager(
-                        new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false)
-                );
-                binding.popularView.setAdapter(new PopularAdapter(itemsModels, currentUser));
-                binding.popularView.setNestedScrollingEnabled(true);
+                // Chỉ cập nhật dữ liệu cho adapter đã có
+                popularAdapter.setItems(itemsModels);
             }
             binding.progressBarPopular.setVisibility(View.GONE);
         });
@@ -166,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initBanner() {
         binding.progressBarSlider.setVisibility(View.VISIBLE);
-
         viewModel.loadBanner().observe(this, bannerModels -> {
             if (bannerModels != null && !bannerModels.isEmpty()) {
                 banners(bannerModels);
@@ -187,14 +166,41 @@ public class MainActivity extends AppCompatActivity {
         binding.viewPagerSlider.setPageTransformer(transformer);
     }
 
-    private void initCategory() {
-        binding.progressBarCategory.setVisibility(View.VISIBLE);
+    private void initUserProfile() {
+        if (currentUser != null) {
+            binding.textView5.setText(currentUser.getUsername());
+            Glide.with(MainActivity.this)
+                    .load(currentUser.getImageUrl())
+                    .placeholder(R.drawable.profile)
+                    .error(R.drawable.profile)
+                    .circleCrop()
+                    .into(binding.imageView2);
+        }
+    }
 
-        viewModel.loadCategory().observe(this, categoryModels -> {
-            binding.categoryView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
-            binding.categoryView.setAdapter(new CategoryAdapter(categoryModels));
-            binding.categoryView.setNestedScrollingEnabled(true);
-            binding.progressBarCategory.setVisibility(View.GONE);
+    // SỬA 4: Sửa toàn bộ logic tìm kiếm
+    private void setupSearchFunctionality() {
+        // Lắng nghe trạng thái tìm kiếm từ ViewModel để ẩn/hiện banner
+        viewModel.isSearching().observe(this, searching -> {
+            int visibility = searching ? View.GONE : View.VISIBLE;
+            binding.viewPagerSlider.setVisibility(visibility);
+            binding.progressBarSlider.setVisibility(visibility);
+        });
+
+        // Cài đặt sự kiện cho nút "Tìm"
+        binding.searchBtn.setOnClickListener(v -> {
+            // SỬA 1: Lấy từ khóa từ ô nhập liệu "searchEdt", không phải "searchBtn"
+            String keyword = binding.searchEdt.getText().toString();
+
+            // Gọi ViewModel để thực hiện tìm kiếm và lắng nghe kết quả trả về
+            viewModel.searchProducts(keyword).observe(MainActivity.this, items -> {
+                if (items != null) {
+                    // SỬA 2 & 3: Sử dụng đúng tên biến "popularAdapter" và gọi phương thức trên đối tượng, không phải trên lớp
+                    if (popularAdapter != null) {
+                        popularAdapter.setItems(items);
+                    }
+                }
+            });
         });
     }
 }

@@ -286,4 +286,48 @@ public class MainRespository {
     }
     // --- KẾT THÚC CẬP NHẬT CHO PROFILE ---
 
+
+    // *** BẮT ĐẦU CẬP NHẬT CHO TÌM SẢN PHẨM KH ***
+    public LiveData<ArrayList<ItemsModel>> searchProducts(String keyword) {
+        MutableLiveData<ArrayList<ItemsModel>> listData = new MutableLiveData<>();
+        DatabaseReference ref = firebaseDatabase.getReference("Items");
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<ItemsModel> fullList = new ArrayList<>();
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    ItemsModel item = childSnapshot.getValue(ItemsModel.class);
+                    if (item != null) {
+                        fullList.add(item);
+                    }
+                }
+
+                // Nếu không có từ khóa, trả về danh sách đầy đủ
+                if (keyword == null || keyword.trim().isEmpty()) {
+                    listData.postValue(fullList);
+                    return;
+                }
+
+                // Nếu có từ khóa, thực hiện lọc ngay tại đây
+                ArrayList<ItemsModel> filteredList = new ArrayList<>();
+                for (ItemsModel item : fullList) {
+                    if (item.getTitle().toLowerCase().contains(keyword.toLowerCase())) {
+                        filteredList.add(item);
+                    }
+                }
+                listData.postValue(filteredList);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Xử lý lỗi nếu cần
+            }
+        });
+
+        return listData;
+    }
+    // --- KẾT THÚC CẬP NHẬT CHO TÌM KIẾM SẢN PHẨM KH ---
+
+
 }

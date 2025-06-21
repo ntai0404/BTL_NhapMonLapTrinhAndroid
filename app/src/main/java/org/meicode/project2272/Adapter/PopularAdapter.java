@@ -89,6 +89,12 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
         return items.size();
     }
 
+    // Trong lớp PopularAdapter.java
+    public void setItems(ArrayList<ItemsModel> newItems) {
+        this.items = newItems;
+        notifyDataSetChanged();
+    }
+
     // Lớp ViewHolder chứa các thành phần giao diện của từng item
     public class ViewHolder extends RecyclerView.ViewHolder {
         ViewholderPopularBinding binding;

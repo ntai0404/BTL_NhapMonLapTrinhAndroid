@@ -1,6 +1,7 @@
 package org.meicode.project2272.ViewModel;
 
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.LiveData;
 
@@ -113,6 +114,23 @@ public class MainViewModel extends ViewModel {
         respository.fetchUserOnce(uid, listener);
     }
     // --- KẾT THÚC CẬP NHẬT CHO PROFILE ---
+
+
+    // *** BẮT ĐẦU CHỨC NĂNG TÌM SẢN PHẨM ***
+    // LiveData để quản lý trạng thái tìm kiếm -> ẩn/hiện banner
+    private final MutableLiveData<Boolean> _isSearching = new MutableLiveData<>(false);
+    public LiveData<Boolean> isSearching() {
+        return _isSearching;
+    }
+    // Hàm này sẽ gọi xuống Repository để tìm kiếm sản phẩm
+    public LiveData<ArrayList<ItemsModel>> searchProducts(String keyword) {
+        // Cập nhật trạng thái: nếu có từ khóa thì đang tìm kiếm, nếu không thì thôi
+        _isSearching.postValue(keyword != null && !keyword.trim().isEmpty());
+
+        // Gọi phương thức tương ứng trong repository
+        return respository.searchProducts(keyword);
+    }
+
 
 }
 
