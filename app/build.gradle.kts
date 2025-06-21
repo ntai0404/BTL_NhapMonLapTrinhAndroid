@@ -60,5 +60,6 @@ dependencies {
     //Xử lý thao tác với Cloudinary
     implementation ("com.cloudinary:cloudinary-android:2.4.0")
 
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }

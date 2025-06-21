@@ -1,8 +1,11 @@
 package org.meicode.project2272.Respository;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import org.meicode.project2272.Model.BannerModel;
+import org.meicode.project2272.Model.BillModel;
 import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.NotificationModel;
@@ -144,6 +147,71 @@ public class MainRespository {
     public Task<Void> deleteProduct(String itemId) {
         DatabaseReference ref = firebaseDatabase.getReference("Items").child(itemId);
         return ref.removeValue();
+    }
+
+    //thống kê
+    public LiveData<ArrayList<BillModel>> loadAllBills() {
+        MutableLiveData<ArrayList<BillModel>> listData = new MutableLiveData<>();
+        DatabaseReference ref = firebaseDatabase.getReference("Bills");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<BillModel> list = new ArrayList<>();
+                if (snapshot.exists()) {
+                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                        if (userSnapshot.hasChildren()) {
+                            for (DataSnapshot billSnapshot : userSnapshot.getChildren()) {
+                                try {
+                                    BillModel item = billSnapshot.getValue(BillModel.class);
+
+                                    // THAY ĐỔI: Đổi "Hoàn thành" thành "Completed"
+                                    if (item != null && "Completed".equalsIgnoreCase(item.getStatus())) {
+                                        list.add(item);
+                                    }
+                                } catch (Exception e) {
+                                    Log.e("FirebaseError", "Không thể phân tích hóa đơn: " + billSnapshot.getKey(), e);
+                                }
+                            }
+                        }
+                    }
+                }
+                listData.setValue(list);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "loadAllBills bị hủy", error.toException());
+            }
+        });
+        return listData;
+    }
+
+    public LiveData<ArrayList<BillModel>> loadPendingBills() {
+        MutableLiveData<ArrayList<BillModel>> listData = new MutableLiveData<>();
+        DatabaseReference ref = firebaseDatabase.getReference("Bills");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<BillModel> pendingList = new ArrayList<>();
+                // SỬA LỖI: Đơn giản hóa vòng lặp cho cấu trúc phẳng "Bills -> billId"
+                for (DataSnapshot billSnapshot : snapshot.getChildren()) {
+                    try {
+                        BillModel item = billSnapshot.getValue(BillModel.class);
+                        if (item != null && "Pending".equalsIgnoreCase(item.getStatus())) {
+                            pendingList.add(item);
+                        }
+                    } catch (Exception e) {
+                        Log.e("FirebaseError", "Không thể phân tích hóa đơn Pending: " + billSnapshot.getKey(), e);
+                    }
+                }
+                listData.setValue(pendingList);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "loadPendingBills bị hủy", error.toException());
+            }
+        });
+        return listData;
     }
 
 

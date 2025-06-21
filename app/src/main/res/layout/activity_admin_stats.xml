@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".Fragment.AdminStatsFragment">
+    tools:context=".Activity.AdminStatsActivity">
 
     <TextView
         android:layout_width="wrap_content"
@@ -33,8 +33,7 @@
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textColor="@color/darkGrey"
-            android:lineSpacingExtra="8dp"
-            tools:text="Tuần 25, 2025: 1.500.000đ\n\nTuần 26, 2025: 2.300.500đ" />
+            tools:text="Tuần 42, 2023: 1.500.000đ\n\nTuần 43, 2023: 2.300.500đ" />
     </ScrollView>
 
 </LinearLayout>

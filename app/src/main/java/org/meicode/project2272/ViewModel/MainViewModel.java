@@ -8,6 +8,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ValueEventListener;
 
 import org.meicode.project2272.Model.BannerModel;
+import org.meicode.project2272.Model.BillModel;
 import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.NotificationModel;
@@ -41,6 +42,14 @@ public class MainViewModel extends ViewModel {
 
     public Task<Void> deleteProduct(String itemId) {
         return respository.deleteProduct(itemId);
+    }
+
+    public LiveData<ArrayList<BillModel>> loadAllBills() {
+        return respository.loadAllBills();
+    }
+
+    public LiveData<ArrayList<BillModel>> loadPendingBills() {
+        return respository.loadPendingBills();
     }
     public LiveData<ArrayList<UserModel>> loadUser(String input,String password,String temp){return respository.loadUser(input, password, temp);}
     public LiveData<ArrayList<CategoryModel>> loadCategory() {
