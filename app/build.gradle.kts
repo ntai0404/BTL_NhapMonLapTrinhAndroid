@@ -59,5 +59,8 @@ dependencies {
     implementation ("de.hdodenhof:circleimageview:3.1.0")
     //Xử lý thao tác với Cloudinary
     implementation ("com.cloudinary:cloudinary-android:2.4.0")
+    // Trang >.<
+    // Thêm thư viện MPAndroidChart
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }

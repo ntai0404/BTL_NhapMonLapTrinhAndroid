@@ -1,5 +1,7 @@
 package org.meicode.project2272.Activity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.content.Intent;
@@ -48,6 +50,10 @@ public class SplashActivity extends AppCompatActivity {
                     Toast.makeText(SplashActivity.this, "Please retry with true information!!!", Toast.LENGTH_SHORT).show();
                 } else {
                     UserModel user = userModels.get(0);
+                    SharedPreferences sharedPreferences = getSharedPreferences("AppSession", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("userId", user.getUid());
+                    editor.apply();
 
                     if (user.getRole().equals("user")) {
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);

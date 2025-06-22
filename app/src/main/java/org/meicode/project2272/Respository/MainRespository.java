@@ -1,4 +1,6 @@
 package org.meicode.project2272.Respository;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -9,10 +11,13 @@ import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.NotificationModel;
 import org.meicode.project2272.Model.UserModel;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,7 +113,9 @@ public class MainRespository {
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     ItemsModel item = childSnapshot.getValue(ItemsModel.class);
                     if (item != null) {
+                        item.setId(childSnapshot.getKey());// Trang coding
                         list.add(item);
+
                     }
                 }
                 listData.setValue(list);
@@ -378,5 +385,217 @@ public class MainRespository {
         cartRef.removeValue();
     }
     // --- KẾT THÚC LOGIC MỚI ---
+
+    // --- LOGIC CODE TRANG ---
+    public void addProduct(ItemsModel item) {
+        DatabaseReference ref = firebaseDatabase.getReference("Items");
+        String itemId = ref.push().getKey(); // Tạo ID duy nhất
+        if (itemId != null) {
+            item.setId(itemId);
+            ref.child(itemId).setValue(item); // Lưu sản phẩm với ID mới
+        }
+    }
+
+    // Cập nhật sản phẩm dựa trên ID
+    public void updateProduct(ItemsModel item) {
+        if (item != null && item.getId() != null) {
+            DatabaseReference ref = firebaseDatabase.getReference("Items").child(item.getId());
+            ref.setValue(item);
+        }
+    }
+
+    // Xóa sản phẩm dựa trên ID
+    public Task<Void> deleteProduct(String itemId) {
+        DatabaseReference ref = firebaseDatabase.getReference("Items").child(itemId);
+        return ref.removeValue();
+    }
+
+    public LiveData<ArrayList<BillModel>> loadPendingBills() {
+        MutableLiveData<ArrayList<BillModel>> listData = new MutableLiveData<>();
+        DatabaseReference ref = firebaseDatabase.getReference("Bills");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<BillModel> pendingList = new ArrayList<>();
+                // SỬA LỖI: Đơn giản hóa vòng lặp cho cấu trúc phẳng "Bills -> billId"
+                for (DataSnapshot billSnapshot : snapshot.getChildren()) {
+                    try {
+                        BillModel item = billSnapshot.getValue(BillModel.class);
+                        if (item != null && "Pending".equalsIgnoreCase(item.getStatus())) {
+                            pendingList.add(item);
+                        }
+                    } catch (Exception e) {
+                        Log.e("FirebaseError", "Không thể phân tích hóa đơn Pending: " + billSnapshot.getKey(), e);
+                    }
+                }
+                listData.setValue(pendingList);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "loadPendingBills bị hủy", error.toException());
+            }
+        });
+        return listData;
+    }
+
+    public LiveData<ArrayList<BillModel>> loadAllBills() {
+        MutableLiveData<ArrayList<BillModel>> listData = new MutableLiveData<>();
+        DatabaseReference ref = firebaseDatabase.getReference("Bills");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<BillModel> list = new ArrayList<>();
+                if (snapshot.exists()) {
+                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                        if (userSnapshot.hasChildren()) {
+                            for (DataSnapshot billSnapshot : userSnapshot.getChildren()) {
+                                try {
+                                    BillModel item = billSnapshot.getValue(BillModel.class);
+
+                                    // THAY ĐỔI: Đổi "Hoàn thành" thành "Completed"
+                                    if (item != null && "Completed".equalsIgnoreCase(item.getStatus())) {
+                                        list.add(item);
+                                    }
+                                } catch (Exception e) {
+                                    Log.e("FirebaseError", "Không thể phân tích hóa đơn: " + billSnapshot.getKey(), e);
+                                }
+                            }
+                        }
+                    }
+                }
+                listData.setValue(list);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseError", "loadAllBills bị hủy", error.toException());
+            }
+        });
+        return listData;
+    }
+
+    // --- END LOGIC CODE TRANG ---
+
+    // --- LOGIC CODE NHUNG ---
+    public MutableLiveData<ArrayList<BillModel>> getAllOrders() {
+        MutableLiveData<ArrayList<BillModel>> liveData = new MutableLiveData<>();
+        DatabaseReference ref = firebaseDatabase.getReference("Bills");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<BillModel> allOrders = new ArrayList<>();
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    // Kiểm tra xem đây là một đơn hàng (có trường userId) hay là một nhánh userId
+                    if (childSnapshot.hasChild("userId")) {
+                        // Trường hợp 1: Đơn hàng nằm phẳng
+                        BillModel bill = childSnapshot.getValue(BillModel.class);
+                        if (bill != null) {
+                            allOrders.add(bill);
+                        }
+                    } else {
+                        // Trường hợp 2: Đây là nhánh userId, chứa các đơn hàng bên trong
+                        for (DataSnapshot billSnapshot : childSnapshot.getChildren()) {
+                            BillModel bill = billSnapshot.getValue(BillModel.class);
+                            if (bill != null) {
+                                allOrders.add(bill);
+                            }
+                        }
+                    }
+                }
+
+                // Sắp xếp tất cả hóa đơn theo ngày tạo
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                    allOrders.sort(Comparator.comparing(BillModel::getCreatedAt).reversed());
+                } else {
+                    Collections.sort(allOrders, (o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
+                }
+                liveData.setValue(allOrders);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Xử lý lỗi
+            }
+        });
+        return liveData;
+    }
+
+    public MutableLiveData<ArrayList<BillModel>> getUserOrders(String userId) {
+        MutableLiveData<ArrayList<BillModel>> liveData = new MutableLiveData<>();
+        DatabaseReference ref = firebaseDatabase.getReference("Bills");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<BillModel> userOrders = new ArrayList<>();
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    // Kiểm tra xem có phải là nhánh userId của người dùng hiện tại không
+                    if (childSnapshot.getKey().equals(userId)) {
+                        for (DataSnapshot billSnapshot : childSnapshot.getChildren()) {
+                            BillModel bill = billSnapshot.getValue(BillModel.class);
+                            if (bill != null) {
+                                userOrders.add(bill);
+                            }
+                        }
+                    }
+                    // Kiểm tra xem có phải là đơn hàng phẳng của người dùng hiện tại không
+                    else if (childSnapshot.hasChild("userId") && childSnapshot.child("userId").getValue(String.class).equals(userId)) {
+                        BillModel bill = childSnapshot.getValue(BillModel.class);
+                        if (bill != null) {
+                            userOrders.add(bill);
+                        }
+                    }
+                }
+
+                // Sắp xếp các hóa đơn theo ngày tạo
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                    userOrders.sort(Comparator.comparing(BillModel::getCreatedAt).reversed());
+                } else {
+                    Collections.sort(userOrders, (o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
+                }
+                liveData.setValue(userOrders);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Xử lý lỗi
+            }
+        });
+        return liveData;
+    }
+
+    public void cancelOrder(BillModel billToCancel) {
+        if (billToCancel == null || billToCancel.getBillId() == null || billToCancel.getUserId() == null) {
+            return; // Không đủ thông tin để hủy
+        }
+
+        String userId = billToCancel.getUserId();
+        String billId = billToCancel.getBillId();
+
+        DatabaseReference ref = firebaseDatabase.getReference("Bills");
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Thử tìm trong cấu trúc lồng nhau trước
+                if (snapshot.hasChild(userId) && snapshot.child(userId).hasChild(billId)) {
+                    snapshot.child(userId).child(billId).getRef().child("status").setValue("Đã hủy");
+                }
+                // Nếu không thấy, thử tìm trong cấu trúc phẳng
+                else if (snapshot.hasChild(billId)) {
+                    snapshot.child(billId).getRef().child("status").setValue("Đã hủy");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Xử lý lỗi khi tìm đơn hàng để hủy
+            }
+        });
+    }
+
+
+    // --- END LOGIC CODE NHUNG ---
 
 }

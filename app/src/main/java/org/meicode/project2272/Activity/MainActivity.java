@@ -1,9 +1,12 @@
 package org.meicode.project2272.Activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -117,10 +120,29 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, CartActivity.class);
                 intent.putExtra("user", currentUser);
                 startActivity(intent);
-            } else if (itemId == R.id.profile) {
+            }
+            else if (itemId == R.id.profile) {
                 Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                 intent.putExtra("user", currentUser);
                 profileLauncher.launch(intent);
+            }
+//            else if (itemId == R.id.bill) {
+//                Intent intent = new Intent(MainActivity.this, ShowOrderActivity.class);
+//                String userId = currentUser.getUid();
+//                intent.putExtra("EXTRA_USER_ID", userId);
+//                profileLauncher.launch(intent);
+//                         }
+            else if (itemId == R.id.bill) {
+                SharedPreferences sharedPreferences = getSharedPreferences("AppSession", Context.MODE_PRIVATE);
+                String userId = sharedPreferences.getString("userId", "");
+                if (userId.isEmpty()) {
+                    Toast.makeText(this, "Không tìm thấy thông tin đăng nhập!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(MainActivity.this, ShowOrderActivity.class);
+                    intent.putExtra("isAdmin", false);
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                }
             }
         });
     }

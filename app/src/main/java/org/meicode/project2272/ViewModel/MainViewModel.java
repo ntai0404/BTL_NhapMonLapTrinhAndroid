@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ValueEventListener;
 
 import org.meicode.project2272.Model.BannerModel;
@@ -142,5 +143,36 @@ public class MainViewModel extends ViewModel {
     }
     // --- KẾT THÚC LOGIC MỚI ---
 
+
+    // --- LOGIC CODE TRANG ---
+    public void addProduct(ItemsModel item) {
+        respository.addProduct(item);
+    }
+    public void updateProduct(ItemsModel item) {
+        respository.updateProduct(item);
+    }
+    public Task<Void> deleteProduct(String itemId) {
+        return respository.deleteProduct(itemId);
+    }
+    public LiveData<ArrayList<BillModel>> loadPendingBills() {
+        return respository.loadPendingBills();
+    }
+    public LiveData<ArrayList<BillModel>> loadAllBills() {
+        return respository.loadAllBills();
+    }
+    // --- END CODE TRANG ---
+
+    // ---LOGIC CODE NHUNG ---
+    public MutableLiveData<ArrayList<BillModel>> getAllOrders() {
+        return respository.getAllOrders();
+    }
+
+    public MutableLiveData<ArrayList<BillModel>> getUserOrders(String userId) {
+        return respository.getUserOrders(userId);
+    }
+    public void cancelOrder(BillModel bill) {
+        respository.cancelOrder(bill);
+    }
+    // ---END LOGIC CODE NHUNG---
 }
 
