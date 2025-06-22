@@ -1,8 +1,11 @@
 package org.meicode.project2272.Activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -60,13 +63,23 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.home) {
                 startActivity(new Intent(MainActivity.this, MainActivity.class));
             }
+           //Code của Nhung
             else if (itemId == R.id.favorites){
-                Intent intent = new Intent(MainActivity.this, ShowOrderActivity.class);
-                intent.putExtra("isAdmin", false);
-                TinyDB tinyDB = new TinyDB(this);
-                String userId = tinyDB.getString("userId");
-                intent.putExtra("userId", userId);
-                startActivity(intent);
+                // 1. Mở file SharedPreferences đã lưu
+                SharedPreferences sharedPreferences = getSharedPreferences("AppSession", Context.MODE_PRIVATE);
+
+                // 2. Đọc giá trị userId. Nếu không có, trả về chuỗi rỗng ""
+                String userId = sharedPreferences.getString("userId", "");
+
+                if (userId.isEmpty()) {
+                    Toast.makeText(this, "Không tìm thấy thông tin đăng nhập!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Intent intent = new Intent(MainActivity.this, ShowOrderActivity.class);
+                    intent.putExtra("isAdmin", false);
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                }
+                // --- KẾT THÚC PHẦN THAY ĐỔI ---
             }
             else if (itemId == R.id.cart) {
                 startActivity(new Intent(MainActivity.this, CartActivity.class));
