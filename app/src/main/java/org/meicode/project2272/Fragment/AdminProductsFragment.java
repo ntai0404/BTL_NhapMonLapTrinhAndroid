@@ -69,16 +69,22 @@ public class AdminProductsFragment extends Fragment implements AdminProductAdapt
 
     @Override
     public void onDeleteClick(ItemsModel item, int position) {
-        new AlertDialog.Builder(getContext())
+        // Hiển thị hộp thoại xác nhận
+        new AlertDialog.Builder(requireContext())
                 .setTitle("Xóa sản phẩm")
                 .setMessage("Bạn có chắc chắn muốn xóa sản phẩm '" + item.getTitle() + "' không?")
                 .setPositiveButton("Xóa", (dialog, which) -> {
-                    // TODO: Gọi phương thức trong ViewModel/Repository để xóa item khỏi Firebase.
-                    // Bạn có thể dùng item.getId() để xác định sản phẩm cần xóa.
-                    Toast.makeText(getContext(), "Chức năng xóa sẽ được triển khai!", Toast.LENGTH_SHORT).show();
+                    // Nếu xác nhận, gọi ViewModel để thực hiện xóa
+                    viewModel.deleteProduct(item.getId()).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(requireContext(), "Xóa thành công", Toast.LENGTH_SHORT).show();
+                            // Không cần xóa thủ công khỏi list, LiveData sẽ tự cập nhật
+                        } else {
+                            Toast.makeText(requireContext(), "Xóa thất bại", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 })
                 .setNegativeButton("Hủy", null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }
 
