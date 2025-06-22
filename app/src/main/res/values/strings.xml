@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">project227.2</string>
-    <string name="title_splash"><font color="#dc6f31">Your Shopping</font> Destination \n for Everything</string>
-    <string name="subtitle_splash">Get personalized recommendations \n Enjoy fast, free shipping</string>
-    <string name="signin">Already have an account? <font color="#dc6f31">Sign in</font></string>
+    <string name="app_name">CLOTHENIN STORE</string>
+    <string name="title_splash"><font color="#dc6f31">Thiên đường</font> Mua sắm \n Cho mọi thứ bạn cần</string>
+    <string name="subtitle_splash">Nhận các gợi ý được cá nhân hóa \n Tận hưởng giao hàng nhanh và tiện ích</string>
+    <string name="signin">Đã có tài khoản? <font color="#dc6f31">Đăng ký</font></string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>

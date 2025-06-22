@@ -43,7 +43,7 @@
                         android:id="@+id/textView4"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Welcome Back" />
+                        android:text="Xin chào!" />
 
                     <TextView
                         android:id="@+id/textView5"
@@ -175,7 +175,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="24dp"
-                android:text="Popular"
+                android:text="Tất cả sản phẩm"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
