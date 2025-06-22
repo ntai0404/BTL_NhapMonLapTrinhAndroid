@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:name=".Activity.MyApplication"
         android:allowBackup="true"
@@ -20,19 +22,16 @@
             android:name=".Activity.RepwActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.RegisterActivity"
-            android:exported="false" />
-        <activity
             android:name=".Activity.ForgotActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.ProfileActivity"
+            android:name=".Activity.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.OrderActivity"
+            android:name=".Activity.AddEditProductActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.NotificationActivity"
+            android:name=".Activity.ManageProductsActivity"
             android:exported="false" />
         <activity
             android:name=".Activity.AdminMainActivity"
@@ -55,7 +54,6 @@
         </activity>
         <activity
             android:name=".Activity.MainActivity"
-            android:windowSoftInputMode="adjustPan"
             android:exported="true" />
     </application>
 
