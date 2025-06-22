@@ -60,10 +60,12 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
             viewModel.getCartItems(currentUser.getUid()).observe(this, itemsInCart -> {
                 if (itemsInCart == null || itemsInCart.isEmpty()) {
                     binding.emptyTxt.setVisibility(View.VISIBLE);
+                    binding.headerLayout.setVisibility(View.VISIBLE);
                     binding.scrollView3.setVisibility(View.GONE);
                     binding.checkoutBtn.setVisibility(View.GONE);
                 } else {
                     binding.emptyTxt.setVisibility(View.GONE);
+                    binding.headerLayout.setVisibility(View.VISIBLE);
                     binding.scrollView3.setVisibility(View.VISIBLE);
                     binding.checkoutBtn.setVisibility(View.VISIBLE);
                 }
