@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,20 +19,26 @@ import java.util.Locale;
 
 public class ShowOrderAdapter extends RecyclerView.Adapter<ShowOrderAdapter.ViewHolder> {
 
+    // 1. Interface để xử lý sự kiện click
+    public interface OnCancelClickListener {
+        void onCancelClick(BillModel bill);
+    }
+
     private ArrayList<BillModel> items;
     private Context context;
-    private boolean isAdmin;
+    private  boolean isAdmin;
+    private OnCancelClickListener cancelClickListener;
 
-    public ShowOrderAdapter(ArrayList<BillModel> items, boolean isAdmin) {
+    public ShowOrderAdapter(ArrayList<BillModel> items, boolean isAdmin, OnCancelClickListener listener) {
         this.items = items;
         this.isAdmin = isAdmin;
+        this.cancelClickListener = listener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        context = parent.getContext();
-        View inflate = LayoutInflater.from(context).inflate(R.layout.viewholder_order, parent, false);
+        View inflate = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_order, parent, false);
         return new ViewHolder(inflate);
     }
 
@@ -47,22 +54,21 @@ public class ShowOrderAdapter extends RecyclerView.Adapter<ShowOrderAdapter.View
 
         holder.orderDateTxt.setText("Ngày đặt: " + bill.getCreatedAt());
         holder.totalAmountTxt.setText(String.format(Locale.getDefault(), "Tổng tiền: %,.0fđ", bill.getTotalAmount()));
-
-        // --- PHẦN MỚI ĐƯỢC THÊM VÀO ---
         holder.shippingAddressTxt.setText("Giao đến: " + bill.getShippingAddress());
         holder.paymentMethodTxt.setText("Thanh toán: " + bill.getPaymentMethod());
         holder.statusTxt.setText(bill.getStatus());
 
-        // Thay đổi màu sắc của trạng thái cho dễ nhìn
         String status = bill.getStatus().toLowerCase();
-        if (status.contains("hủy")) {
-            holder.statusTxt.setBackgroundColor(Color.RED);
-        } else if (status.contains("thành công")) {
-            holder.statusTxt.setBackgroundColor(Color.parseColor("#4CAF50")); // Green
-        } else {
-            holder.statusTxt.setBackgroundColor(Color.parseColor("#FF9800")); // Orange
+        if (status.contains("hủy") || status.contains("cancelled")) {
+            holder.statusTxt.setBackgroundColor(Color.parseColor("#E53935")); // Red
+            holder.cancelBtn.setVisibility(View.GONE); // Ẩn nút hủy nếu đã hủy
+        } else if (status.contains("thành công") || status.contains("completed")) {
+            holder.statusTxt.setBackgroundColor(Color.parseColor("#43A047")); // Green
+            holder.cancelBtn.setVisibility(View.GONE); // Ẩn nút hủy nếu đã hoàn thành
+        } else { // Trạng thái "Pending", "Chờ xác nhận",...
+            holder.statusTxt.setBackgroundColor(Color.parseColor("#FB8C00")); // Orange
+            holder.cancelBtn.setVisibility(View.VISIBLE); // Hiển thị nút hủy
         }
-        // --- KẾT THÚC PHẦN MỚI ---
 
         if (isAdmin) {
             holder.userIdTxt.setVisibility(View.VISIBLE);
@@ -70,6 +76,12 @@ public class ShowOrderAdapter extends RecyclerView.Adapter<ShowOrderAdapter.View
         } else {
             holder.userIdTxt.setVisibility(View.GONE);
         }
+
+        holder.cancelBtn.setOnClickListener(v -> {
+            if (cancelClickListener != null) {
+                cancelClickListener.onCancelClick(bill);
+            }
+        });
     }
 
     @Override
@@ -78,8 +90,8 @@ public class ShowOrderAdapter extends RecyclerView.Adapter<ShowOrderAdapter.View
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        // Thêm các TextView mới vào đây
         TextView orderIdTxt, orderDateTxt, totalAmountTxt, userIdTxt, shippingAddressTxt, paymentMethodTxt, statusTxt;
+        Button cancelBtn; // Thêm nút hủy
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -87,11 +99,10 @@ public class ShowOrderAdapter extends RecyclerView.Adapter<ShowOrderAdapter.View
             orderDateTxt = itemView.findViewById(R.id.orderDateTxt);
             totalAmountTxt = itemView.findViewById(R.id.totalAmountTxt);
             userIdTxt = itemView.findViewById(R.id.userIdTxt);
-
-            // Ánh xạ các TextView mới từ layout
             shippingAddressTxt = itemView.findViewById(R.id.shippingAddressTxt);
             paymentMethodTxt = itemView.findViewById(R.id.paymentMethodTxt);
             statusTxt = itemView.findViewById(R.id.statusTxt);
+            cancelBtn = itemView.findViewById(R.id.cancelBtn); // Ánh xạ nút hủy
         }
     }
 }

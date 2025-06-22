@@ -68,20 +68,6 @@ public class ManageProductsActivity extends AppCompatActivity implements AdminPr
 
     @Override
     public void onDeleteClick(ItemsModel item, int position) {
-        new AlertDialog.Builder(this)
-                .setTitle("Xóa sản phẩm")
-                .setMessage("Bạn có chắc chắn muốn xóa sản phẩm '" + item.getTitle() + "' không?")
-                .setPositiveButton("Xóa", (dialog, which) -> {
-                    respository.deleteProduct(item.getKey()).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(ManageProductsActivity.this, "Xóa thành công", Toast.LENGTH_SHORT).show();
-                            // Không cần xóa thủ công khỏi list vì LiveData sẽ tự cập nhật
-                        } else {
-                            Toast.makeText(ManageProductsActivity.this, "Xóa thất bại", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                })
-                .setNegativeButton("Hủy", null)
-                .show();
+        
     }
 }

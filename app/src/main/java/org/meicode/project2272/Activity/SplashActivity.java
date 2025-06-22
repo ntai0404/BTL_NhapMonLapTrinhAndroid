@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.meicode.project2272.Helper.TinyDB;
 import org.meicode.project2272.Model.UserModel;
 import org.meicode.project2272.ViewModel.MainViewModel;
 import org.meicode.project2272.databinding.ActivitySplashBinding;
@@ -48,7 +49,9 @@ public class SplashActivity extends AppCompatActivity {
                     Toast.makeText(SplashActivity.this, "Please retry with true information!!!", Toast.LENGTH_SHORT).show();
                 } else {
                     UserModel user = userModels.get(0);
-
+                    //thêm 2 dòng này
+                    TinyDB tinyDB = new TinyDB(SplashActivity.this);
+                    tinyDB.putString("userId", user.getUid());
                     if (user.getRole().equals("user")) {
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                         intent.putExtra("user", user);

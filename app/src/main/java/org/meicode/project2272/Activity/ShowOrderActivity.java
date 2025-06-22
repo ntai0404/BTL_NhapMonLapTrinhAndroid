@@ -1,5 +1,6 @@
 package org.meicode.project2272.Activity;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -11,10 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.meicode.project2272.Adapter.ShowOrderAdapter;
+import org.meicode.project2272.Model.BillModel;
 import org.meicode.project2272.R;
 import org.meicode.project2272.ViewModel.MainViewModel;
 
-public class ShowOrderActivity extends AppCompatActivity {
+public class ShowOrderActivity extends AppCompatActivity implements ShowOrderAdapter.OnCancelClickListener {
 
     private MainViewModel viewModel;
     private RecyclerView ordersRecyclerView;
@@ -55,7 +57,8 @@ public class ShowOrderActivity extends AppCompatActivity {
     private void loadUserOrders(String userIdToLoad) {
         viewModel.getUserOrders(userIdToLoad).observe(this, bills -> {
             if (bills != null) {
-                adapter = new ShowOrderAdapter(bills, false);
+                // 2. Khi tạo Adapter, truyền 'this' vào làm listener
+                adapter = new ShowOrderAdapter(bills, false, this);
                 ordersRecyclerView.setAdapter(adapter);
             }
             progressBar.setVisibility(View.GONE);
@@ -65,10 +68,28 @@ public class ShowOrderActivity extends AppCompatActivity {
     private void loadAllOrders() {
         viewModel.getAllOrders().observe(this, bills -> {
             if (bills != null) {
-                adapter = new ShowOrderAdapter(bills, true);
+                // 2. Khi tạo Adapter, truyền 'this' vào làm listener
+                adapter = new ShowOrderAdapter(bills, true, this);
                 ordersRecyclerView.setAdapter(adapter);
             }
             progressBar.setVisibility(View.GONE);
         });
+    }
+
+    // 3. Override phương thức onCancelClick để xử lý sự kiện
+    @Override
+    public void onCancelClick(BillModel bill) {
+        // Hiển thị hộp thoại xác nhận trước khi hủy
+        new AlertDialog.Builder(this)
+                .setTitle("Hủy Đơn Hàng")
+                .setMessage("Bạn có chắc chắn muốn hủy đơn hàng #" + (bill.getBillId() != null ? bill.getBillId().substring(0, 8) : "") + "?")
+                .setPositiveButton("Xác nhận", (dialog, which) -> {
+                    // Nếu người dùng xác nhận, gọi ViewModel để thực hiện việc hủy
+                    viewModel.cancelOrder(bill);
+                    Toast.makeText(this, "Đã gửi yêu cầu hủy đơn hàng.", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Không", null) // Nút "Không" không làm gì cả
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 }

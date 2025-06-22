@@ -13,7 +13,9 @@ import androidx.viewpager2.widget.MarginPageTransformer;
 
 import org.meicode.project2272.Adapter.CategoryAdapter;
 import org.meicode.project2272.Adapter.PopularAdapter;
+import org.meicode.project2272.Adapter.ShowOrderAdapter;
 import org.meicode.project2272.Adapter.SliderAdapter;
+import org.meicode.project2272.Helper.TinyDB;
 import org.meicode.project2272.Model.BannerModel;
 import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.Model.ItemsModel;
@@ -55,9 +57,18 @@ public class MainActivity extends AppCompatActivity {
 
         binding.bottomNavigation.setItemSelected(R.id.home, true);
         binding.bottomNavigation.setOnItemSelectedListener(itemId -> {
-            if (itemId == R.id.home || itemId == R.id.favorites) {
+            if (itemId == R.id.home) {
                 startActivity(new Intent(MainActivity.this, MainActivity.class));
-            } else if (itemId == R.id.cart) {
+            }
+            else if (itemId == R.id.favorites){
+                Intent intent = new Intent(MainActivity.this, ShowOrderActivity.class);
+                intent.putExtra("isAdmin", false);
+                TinyDB tinyDB = new TinyDB(this);
+                String userId = tinyDB.getString("userId");
+                intent.putExtra("userId", userId);
+                startActivity(intent);
+            }
+            else if (itemId == R.id.cart) {
                 startActivity(new Intent(MainActivity.this, CartActivity.class));
             } else if (itemId == R.id.profile) {
                 // Chưa xử lý

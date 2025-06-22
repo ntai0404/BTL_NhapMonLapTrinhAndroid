@@ -25,10 +25,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Mã đơn hàng: #12345"
+                android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"/>
+                tools:text="Mã đơn hàng: #12345" />
 
             <TextView
                 android:id="@+id/statusTxt"
@@ -37,47 +37,47 @@
                 android:background="@drawable/purple_full_corner_bg"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
-                android:text="Chờ xác nhận"
                 android:textColor="@color/white"
                 android:textSize="12sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                tools:text="Chờ xác nhận" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginVertical="8dp"
-            android:background="#E0E0E0"/>
+            android:background="#E0E0E0" />
 
         <TextView
             android:id="@+id/orderDateTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ngày đặt: 21/06/2025" />
+            tools:text="Ngày đặt: 21/06/2025" />
 
         <TextView
             android:id="@+id/shippingAddressTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Giao đến: Đại Học Thủy Lợi"/>
+            tools:text="Giao đến: Đại Học Thủy Lợi" />
 
         <TextView
             android:id="@+id/paymentMethodTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Thanh toán: Khi nhận hàng"/>
+            tools:text="Thanh toán: Khi nhận hàng" />
 
         <TextView
             android:id="@+id/totalAmountTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Tổng tiền: 500.000đ"
             android:textColor="#FF5B4CBD"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="Tổng tiền: 500.000đ" />
 
         <TextView
             android:id="@+id/userIdTxt"
@@ -85,8 +85,20 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:visibility="gone"
-            tools:visibility="visible"
-            android:text="Người dùng: user@example.com" />
+            tools:text="Người dùng: user@example.com"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/cancelBtn"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="#E53935"
+            android:text="Hủy Đơn Hàng"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

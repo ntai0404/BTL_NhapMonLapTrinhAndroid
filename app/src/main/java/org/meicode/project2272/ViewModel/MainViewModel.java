@@ -1,9 +1,11 @@
 package org.meicode.project2272.ViewModel;
 
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.LiveData;
 
 import org.meicode.project2272.Model.BannerModel;
+import org.meicode.project2272.Model.BillModel;
 import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.UserModel;
@@ -41,6 +43,16 @@ public class MainViewModel extends ViewModel {
      */
     public LiveData<ArrayList<ItemsModel>> loadPopular() {
         return respository.loadPopular();
+    }
+    public MutableLiveData<ArrayList<BillModel>> getAllOrders() {
+        return respository.getAllOrders();
+    }
+
+    public MutableLiveData<ArrayList<BillModel>> getUserOrders(String userId) {
+        return respository.getUserOrders(userId);
+    }
+    public void cancelOrder(BillModel bill) {
+        respository.cancelOrder(bill);
     }
 }
 
