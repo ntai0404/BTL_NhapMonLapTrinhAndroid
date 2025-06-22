@@ -65,12 +65,8 @@ public class MainActivity extends AppCompatActivity {
             }
            //Code của Nhung
             else if (itemId == R.id.favorites){
-                // 1. Mở file SharedPreferences đã lưu
                 SharedPreferences sharedPreferences = getSharedPreferences("AppSession", Context.MODE_PRIVATE);
-
-                // 2. Đọc giá trị userId. Nếu không có, trả về chuỗi rỗng ""
                 String userId = sharedPreferences.getString("userId", "");
-
                 if (userId.isEmpty()) {
                     Toast.makeText(this, "Không tìm thấy thông tin đăng nhập!", Toast.LENGTH_SHORT).show();
                 } else {

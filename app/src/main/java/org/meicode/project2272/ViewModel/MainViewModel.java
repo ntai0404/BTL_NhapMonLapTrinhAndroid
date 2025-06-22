@@ -44,6 +44,7 @@ public class MainViewModel extends ViewModel {
     public LiveData<ArrayList<ItemsModel>> loadPopular() {
         return respository.loadPopular();
     }
+    // code của Nhung
     public MutableLiveData<ArrayList<BillModel>> getAllOrders() {
         return respository.getAllOrders();
     }

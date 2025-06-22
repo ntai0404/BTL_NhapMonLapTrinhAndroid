@@ -51,17 +51,10 @@ public class SplashActivity extends AppCompatActivity {
                     Toast.makeText(SplashActivity.this, "Please retry with true information!!!", Toast.LENGTH_SHORT).show();
                 } else {
                     UserModel user = userModels.get(0);
-                    //thêm 2 dòng này
-                    // 1. Tạo hoặc mở file SharedPreferences có tên "AppSession"
                     SharedPreferences sharedPreferences = getSharedPreferences("AppSession", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                    // 2. Đặt giá trị userId vào với key là "userId"
                     editor.putString("userId", user.getUid());
-
-                    // 3. Lưu lại thay đổi (apply() thực hiện trong nền)
                     editor.apply();
-                    // --- KẾT THÚC PHẦN THAY ĐỔI ---
                     if (user.getRole().equals("user")) {
                         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                         intent.putExtra("user", user);
