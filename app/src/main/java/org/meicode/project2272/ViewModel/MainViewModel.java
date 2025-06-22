@@ -142,18 +142,5 @@ public class MainViewModel extends ViewModel {
     }
     // --- KẾT THÚC LOGIC MỚI ---
 
-    // ---LOGIC CODE NHUNG---
-    public MutableLiveData<ArrayList<BillModel>> getAllOrders() {
-        return respository.getAllOrders();
-    }
-
-    public MutableLiveData<ArrayList<BillModel>> getUserOrders(String userId) {
-        return respository.getUserOrders(userId);
-    }
-    public void cancelOrder(BillModel bill) {
-        respository.cancelOrder(bill);
-    }
-    // ---END LOGIC CODE NHUNG---
-
 }
 

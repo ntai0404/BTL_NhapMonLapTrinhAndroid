@@ -113,11 +113,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.bottomNavigation.setOnItemSelectedListener(itemId -> {
-            if (itemId == R.id.bill) {
-                Intent intent = new Intent(MainActivity.this, ShowOrderActivity.class);
-                intent.putExtra("user", currentUser);
-                startActivity(intent);
-            }
             if (itemId == R.id.cart) {
                 Intent intent = new Intent(MainActivity.this, CartActivity.class);
                 intent.putExtra("user", currentUser);
