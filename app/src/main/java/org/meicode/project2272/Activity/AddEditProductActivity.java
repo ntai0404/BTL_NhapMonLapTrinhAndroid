@@ -22,6 +22,8 @@ import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.ViewModel.MainViewModel;
 import org.meicode.project2272.databinding.ActivityAddEditProductBinding;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class AddEditProductActivity extends AppCompatActivity {
@@ -31,9 +33,9 @@ public class AddEditProductActivity extends AppCompatActivity {
     private ItemsModel existingProduct;
     private boolean isEditMode = false;
 
-    // Danh sách để lưu các lựa chọn
+    // Các danh sách này vẫn làm việc với tên màu và size để hiển thị trên UI
     private ArrayList<String> selectedSizes = new ArrayList<>();
-    private ArrayList<String> selectedColors = new ArrayList<>();
+    private ArrayList<String> selectedColors = new ArrayList<>(); // Chứa tên màu: "Đen", "Trắng"...
     private ArrayList<String> imageUrls = new ArrayList<>();
 
     private ActivityResultLauncher<String> imagePickerLauncher;
@@ -43,7 +45,6 @@ public class AddEditProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityAddEditProductBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         initImagePicker();
         setupSpinners();
@@ -60,14 +61,103 @@ public class AddEditProductActivity extends AppCompatActivity {
         setListeners();
     }
 
+    private void setupEditMode() {
+        binding.toolbarTitle.setText("Chỉnh sửa Sản phẩm");
+
+        // Điền dữ liệu
+        binding.titleEdt.setText(existingProduct.getTitle());
+        binding.descriptionEdt.setText(existingProduct.getDescription());
+        binding.priceEdt.setText(String.valueOf(existingProduct.getPrice()));
+        binding.oldPriceEdt.setText(String.valueOf(existingProduct.getOldPrice()));
+        binding.offPercentEdt.setText(existingProduct.getOffPercent());
+
+        if (existingProduct.getSize() != null) {
+            selectedSizes.addAll(existingProduct.getSize());
+            for (String size : selectedSizes) {
+                addChipToGroup(size, binding.sizeChipGroup, selectedSizes);
+            }
+        }
+
+        // CẬP NHẬT: Chuyển đổi mã hex từ Firebase sang tên màu để hiển thị
+        if (existingProduct.getColor() != null) {
+            List<String> colorNames = Arrays.asList(getResources().getStringArray(R.array.common_colors));
+            List<String> colorHexes = Arrays.asList(getResources().getStringArray(R.array.common_colors_hex));
+
+            for (String hexCode : existingProduct.getColor()) {
+                int index = colorHexes.indexOf(hexCode);
+                if (index != -1) {
+                    String colorName = colorNames.get(index);
+                    if (!selectedColors.contains(colorName)) {
+                        selectedColors.add(colorName);
+                        addChipToGroup(colorName, binding.colorChipGroup, selectedColors);
+                    }
+                }
+            }
+        }
+
+        if (existingProduct.getPicUrl() != null) {
+            imageUrls.addAll(existingProduct.getPicUrl());
+            updateImageUrlsTextView();
+        }
+    }
+
+    private void saveProduct() {
+        // Lấy dữ liệu
+        String title = binding.titleEdt.getText().toString().trim();
+        String description = binding.descriptionEdt.getText().toString().trim();
+        String priceStr = binding.priceEdt.getText().toString().trim();
+        String oldPriceStr = binding.oldPriceEdt.getText().toString().trim();
+        String offPercentStr = binding.offPercentEdt.getText().toString().trim();
+
+        if (title.isEmpty() || description.isEmpty() || priceStr.isEmpty() || oldPriceStr.isEmpty() || offPercentStr.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ItemsModel productToSave = isEditMode ? existingProduct : new ItemsModel();
+
+        // Gán dữ liệu
+        productToSave.setTitle(title);
+        productToSave.setDescription(description);
+        productToSave.setPrice(Integer.parseInt(priceStr));
+        productToSave.setOldPrice(Integer.parseInt(oldPriceStr));
+        productToSave.setOffPercent(offPercentStr);
+        productToSave.setPicUrl(imageUrls);
+        productToSave.setSize(selectedSizes); // Size vẫn lưu dạng chữ
+
+        // CẬP NHẬT: Chuyển đổi tên màu sang mã hex trước khi lưu
+        ArrayList<String> colorHexCodes = new ArrayList<>();
+        List<String> colorNames = Arrays.asList(getResources().getStringArray(R.array.common_colors));
+        List<String> colorHexes = Arrays.asList(getResources().getStringArray(R.array.common_colors_hex));
+
+        for (String selectedName : selectedColors) {
+            int index = colorNames.indexOf(selectedName);
+            if (index != -1) {
+                colorHexCodes.add(colorHexes.get(index));
+            }
+        }
+        productToSave.setColor(colorHexCodes); // Lưu danh sách mã hex
+
+        if (isEditMode) {
+            viewModel.updateProduct(productToSave);
+            Toast.makeText(this, "Cập nhật sản phẩm thành công", Toast.LENGTH_SHORT).show();
+        } else {
+            productToSave.setRating(0.0);
+            productToSave.setReview(0);
+            viewModel.addProduct(productToSave);
+            Toast.makeText(this, "Thêm sản phẩm thành công", Toast.LENGTH_SHORT).show();
+        }
+        finish();
+    }
+
+    // Các phương thức khác giữ nguyên
+    // ... setupSpinners(), setListeners(), addChipToGroup(), initImagePicker(), uploadImageToCloudinary(), updateImageUrlsTextView()
     private void setupSpinners() {
-        // Setup Size Spinner
         ArrayAdapter<CharSequence> sizeAdapter = ArrayAdapter.createFromResource(
                 this, R.array.common_sizes, android.R.layout.simple_spinner_item);
         sizeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.sizeSpinner.setAdapter(sizeAdapter);
 
-        // Setup Color Spinner
         ArrayAdapter<CharSequence> colorAdapter = ArrayAdapter.createFromResource(
                 this, R.array.common_colors, android.R.layout.simple_spinner_item);
         colorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -79,7 +169,6 @@ public class AddEditProductActivity extends AppCompatActivity {
         binding.saveBtn.setOnClickListener(v -> saveProduct());
         binding.chooseImageBtn.setOnClickListener(v -> imagePickerLauncher.launch("image/*"));
 
-        // Listener cho nút thêm Size và Color
         binding.addSizeBtn.setOnClickListener(v -> {
             String size = binding.sizeSpinner.getSelectedItem().toString();
             if (!size.isEmpty() && !selectedSizes.contains(size)) {
@@ -110,73 +199,6 @@ public class AddEditProductActivity extends AppCompatActivity {
         chipGroup.addView(chip);
     }
 
-    private void setupEditMode() {
-        binding.toolbarTitle.setText("Chỉnh sửa Sản phẩm");
-
-        // Điền dữ liệu
-        binding.titleEdt.setText(existingProduct.getTitle());
-        binding.descriptionEdt.setText(existingProduct.getDescription());
-        binding.priceEdt.setText(String.valueOf(existingProduct.getPrice()));
-        binding.oldPriceEdt.setText(String.valueOf(existingProduct.getOldPrice()));
-        binding.offPercentEdt.setText(existingProduct.getOffPercent());
-
-        // Hiển thị các size và color đã có
-        if (existingProduct.getSize() != null) {
-            selectedSizes.addAll(existingProduct.getSize());
-            for (String size : selectedSizes) {
-                addChipToGroup(size, binding.sizeChipGroup, selectedSizes);
-            }
-        }
-        if (existingProduct.getColor() != null) {
-            selectedColors.addAll(existingProduct.getColor());
-            for (String color : selectedColors) {
-                addChipToGroup(color, binding.colorChipGroup, selectedColors);
-            }
-        }
-        if (existingProduct.getPicUrl() != null) {
-            imageUrls.addAll(existingProduct.getPicUrl());
-            updateImageUrlsTextView();
-        }
-    }
-
-    private void saveProduct() {
-        // Lấy dữ liệu
-        String title = binding.titleEdt.getText().toString().trim();
-        String description = binding.descriptionEdt.getText().toString().trim();
-        String priceStr = binding.priceEdt.getText().toString().trim();
-        String oldPriceStr = binding.oldPriceEdt.getText().toString().trim();
-        String offPercentStr = binding.offPercentEdt.getText().toString().trim();
-
-        if (title.isEmpty() || description.isEmpty() || priceStr.isEmpty() || oldPriceStr.isEmpty() || offPercentStr.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        ItemsModel productToSave = isEditMode ? existingProduct : new ItemsModel();
-
-        // Gán dữ liệu
-        productToSave.setTitle(title);
-        productToSave.setDescription(description);
-        productToSave.setPrice(Integer.parseInt(priceStr));
-        productToSave.setOldPrice(Integer.parseInt(oldPriceStr));
-        productToSave.setOffPercent(offPercentStr);
-        productToSave.setPicUrl(imageUrls);
-        productToSave.setSize(selectedSizes);
-        productToSave.setColor(selectedColors);
-
-        if (isEditMode) {
-            viewModel.updateProduct(productToSave);
-            Toast.makeText(this, "Cập nhật sản phẩm thành công", Toast.LENGTH_SHORT).show();
-        } else {
-            productToSave.setRating(0.0);
-            productToSave.setReview(0);
-            viewModel.addProduct(productToSave);
-            Toast.makeText(this, "Thêm sản phẩm thành công", Toast.LENGTH_SHORT).show();
-        }
-        finish();
-    }
-
-    // Các phương thức hỗ trợ upload ảnh (giữ nguyên)
     private void initImagePicker() {
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),

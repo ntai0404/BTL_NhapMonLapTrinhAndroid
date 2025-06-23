@@ -16,11 +16,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
@@ -59,7 +62,7 @@ public class MainRespository {
         return listData;
     }
 
-    //Load Category
+    //Load Category >.< REFUSE, WE DONT NEED >.<
     public LiveData<ArrayList<CategoryModel>> loadCategory(){
         MutableLiveData<ArrayList<CategoryModel>> listData=new MutableLiveData<>();
         DatabaseReference ref=firebaseDatabase.getReference("Category");
@@ -74,14 +77,11 @@ public class MainRespository {
                 listData.setValue(list);
             }
             @Override
-            public void onCancelled(@NonNull DatabaseError error){
-
-            }
-        });
-        return listData;
+            public void onCancelled(@NonNull DatabaseError error){}
+        });return listData;
     }
 
-    //Banner
+    //Load Banner  >.<
     public LiveData<ArrayList<BannerModel>> loadBanner(){
         MutableLiveData<ArrayList<BannerModel>> listData=new MutableLiveData<>();
         DatabaseReference ref=firebaseDatabase.getReference("Banner");
@@ -96,14 +96,12 @@ public class MainRespository {
                 listData.setValue(list);
             }
             @Override
-            public void onCancelled(@NonNull DatabaseError error){
-
-            }
+            public void onCancelled(@NonNull DatabaseError error){}
         });
         return listData;
     }
 
-    //Items Popular
+    //Items Popular == All Item
     public LiveData<ArrayList<ItemsModel>> loadPopular() {
         MutableLiveData<ArrayList<ItemsModel>> listData = new MutableLiveData<>();
         DatabaseReference ref = firebaseDatabase.getReference("Items");
@@ -130,11 +128,10 @@ public class MainRespository {
     }
 
 
-
-    // --- LOGIC GIỎ HÀNG MỚI ---
+    // ---START REGION TRUE NGUYEN XUAN TAI ---
+    // --- LOGIC CART ---
     public LiveData<ArrayList<ItemsModel>> getAllItems() {
-        // Giả sử bạn có một hàm load tất cả sản phẩm, ví dụ loadPopular
-        // Nếu không, bạn cần tạo một hàm riêng để lấy tất cả item từ Firebase
+        // có một hàm load tất cả sản phẩm loadPopular ^^^^
         return loadPopular();
     }
 
@@ -168,6 +165,53 @@ public class MainRespository {
             }
         });
         return liveData;
+    }
+
+    public void addToCart(String userId, String itemId, String size, String color, int quantity) {
+        if (userId == null) return;
+
+        DatabaseReference cartRef = firebaseDatabase.getReference("Carts").child(userId);
+
+        // 1. Truy vấn để tìm sản phẩm có cùng itemId, size, và color
+        Query query = cartRef.orderByChild("itemId").equalTo(itemId);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean itemExists = false;
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    CartModel cartItem = childSnapshot.getValue(CartModel.class);
+
+                    // 2. Nếu tìm thấy sản phẩm, kiểm tra tiếp size và color
+                    if (cartItem != null && size.equals(cartItem.getSize()) && color.equals(cartItem.getColor())) {
+                        // 3. Đã tồn tại -> Cập nhật số lượng
+                        int newQuantity = cartItem.getQuantity() + quantity;
+                        childSnapshot.getRef().child("quantity").setValue(newQuantity);
+                        itemExists = true;
+                        break;
+                    }
+                }
+
+                // 4. Nếu không tồn tại -> Thêm mục mới vào giỏ hàng
+                if (!itemExists) {
+                    String cartId = cartRef.push().getKey();
+                    if (cartId != null) {
+                        CartModel newItem = new CartModel();
+                        newItem.setItemId(itemId);
+                        newItem.setQuantity(quantity);
+                        newItem.setSize(size);
+                        newItem.setColor(color);
+                        // Không cần set cartId vào object vì key của node đã là cartId
+                        cartRef.child(cartId).setValue(newItem);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("AddToCartError", "Lỗi khi kiểm tra giỏ hàng: " + error.getMessage());
+            }
+        });
     }
 
     public void updateCartItemQuantity(String userId, String cartId, int change) {
@@ -244,8 +288,22 @@ public class MainRespository {
 
         notificationRef.setValue(true); // Cập nhật giá trị
     }
-    //End Logic for Notification
+    // Hàm tạo thông báo trong app (lưu vào Realtime Database)
+    private void createInAppNotification(String userId, String content) {
+        if (userId == null) return;
+        DatabaseReference notifRef = firebaseDatabase.getReference("Notifications").child(userId);
+        String notificationId = notifRef.push().getKey();
+        if (notificationId == null) return;
 
+        NotificationModel notification = new NotificationModel();
+        notification.setNotificationId(notificationId);
+        notification.setUserId(userId);
+        notification.setContent(content);
+        notification.setRead(false);
+
+        notifRef.child(notificationId).setValue(notification);
+    }
+    //End Logic for Notification
 
     // *** BẮT ĐẦU CẬP NHẬT CHO PROFILE ***
     // THÊM HÀM MỚI ĐỂ CẬP NHẬT THÔNG TIN USER
@@ -273,7 +331,7 @@ public class MainRespository {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    // Xử lý lỗi nếu cần
+                    // Xử lý lỗi nếu cần >.<
                 }
             });
         }
@@ -297,8 +355,21 @@ public class MainRespository {
     }
     // --- KẾT THÚC CẬP NHẬT CHO PROFILE ---
 
+    // *** BẮT ĐẦU LOGIC LỌC ***
+    // Hàm tiện ích để loại bỏ dấu Tiếng Việt và chuyển thành chữ thường
+    private String removeDiacritics(String str) {
+        if (str == null) {
+            return "";
+        }
+        String nfdNormalizedString = Normalizer.normalize(str, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        // Thay thế các ký tự dấu, chuyển sang chữ thường và xử lý chữ 'đ'
+        return pattern.matcher(nfdNormalizedString).replaceAll("")
+                .toLowerCase()
+                .replaceAll("đ", "d");
+    }
 
-    // *** BẮT ĐẦU CẬP NHẬT CHO TÌM SẢN PHẨM KH ***
+    // *** BẮT ĐẦU PHIÊN BẢN TỐI ƯU LOGIC LỌC ***
     public LiveData<ArrayList<ItemsModel>> searchProducts(String keyword) {
         MutableLiveData<ArrayList<ItemsModel>> listData = new MutableLiveData<>();
         DatabaseReference ref = firebaseDatabase.getReference("Items");
@@ -314,33 +385,63 @@ public class MainRespository {
                     }
                 }
 
-                // Nếu không có từ khóa, trả về danh sách đầy đủ
+                // Nếu không có từ khóa hoặc từ khóa trống, trả về danh sách đầy đủ
                 if (keyword == null || keyword.trim().isEmpty()) {
                     listData.postValue(fullList);
                     return;
                 }
 
-                // Nếu có từ khóa, thực hiện lọc ngay tại đây
+                // --- Bắt đầu logic lọc thông minh ---
                 ArrayList<ItemsModel> filteredList = new ArrayList<>();
+
+                // 1. Chuẩn hóa và tách các từ trong chuỗi tìm kiếm của người dùng
+                String normalizedKeyword = removeDiacritics(keyword);
+                // Tách chuỗi thành mảng các từ, dựa trên một hoặc nhiều khoảng trắng
+                String[] searchKeywords = normalizedKeyword.split("\\s+");
+
+                // Lặp qua toàn bộ sản phẩm để lọc
                 for (ItemsModel item : fullList) {
-                    if (item.getTitle().toLowerCase().contains(keyword.toLowerCase())) {
-                        filteredList.add(item);
+                    if (item.getTitle() == null) {
+                        continue; // Bỏ qua sản phẩm không có tên
+                    }
+
+                    // 2. Chuẩn hóa tên sản phẩm để so sánh
+                    String normalizedTitle = removeDiacritics(item.getTitle());
+
+                    boolean allKeywordsMatch = true; // Giả định sản phẩm này khớp với tất cả từ khóa
+
+                    // 3. Lặp qua từng từ khóa người dùng nhập vào
+                    for (String key : searchKeywords) {
+                        // Nếu tên sản phẩm đã chuẩn hóa KHÔNG chứa một từ khóa nào đó...
+                        if (!normalizedTitle.contains(key)) {
+                            allKeywordsMatch = false; // ...thì đánh dấu là không khớp
+                            break; // ...và thoát vòng lặp, không cần kiểm tra các từ khóa còn lại cho sản phẩm này
+                        }
+                    }
+
+                    // 4. Nếu sau khi kiểm tra, sản phẩm vẫn được đánh dấu là khớp tất cả...
+                    if (allKeywordsMatch) {
+                        filteredList.add(item); // ...thì thêm nó vào danh sách kết quả
                     }
                 }
                 listData.postValue(filteredList);
+                // --- Kết thúc logic lọc thông minh ---
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Xử lý lỗi nếu cần
+                // Ghi log lỗi để dễ dàng gỡ rối khi có sự cố
+                Log.e("MainRepository", "Lỗi khi tìm kiếm sản phẩm: " + error.getMessage());
+                // Cân nhắc postValue một danh sách rỗng hoặc null để UI có thể xử lý trường hợp lỗi
+                listData.postValue(new ArrayList<>());
             }
         });
 
         return listData;
     }
-    // --- KẾT THÚC CẬP NHẬT CHO TÌM KIẾM SẢN PHẨM KH ---
+    // --- KẾT THÚC PHIÊN BẢN ĐÃ TỐI ƯU ---
 
-    // --- LOGIC MỚI CHO ĐẶT HÀNG ---
+    // --- LOGIC CHO ĐẶT HÀNG ---
     public LiveData<Boolean> placeOrderAndCreateNotification(BillModel bill) {
         MutableLiveData<Boolean> result = new MutableLiveData<>();
         DatabaseReference billsRef = firebaseDatabase.getReference("Bills");
@@ -364,22 +465,6 @@ public class MainRespository {
         });
 
         return result;
-    }
-
-    // Hàm tạo thông báo trong app (lưu vào Realtime Database)
-    private void createInAppNotification(String userId, String content) {
-        if (userId == null) return;
-        DatabaseReference notifRef = firebaseDatabase.getReference("Notifications").child(userId);
-        String notificationId = notifRef.push().getKey();
-        if (notificationId == null) return;
-
-        NotificationModel notification = new NotificationModel();
-        notification.setNotificationId(notificationId);
-        notification.setUserId(userId);
-        notification.setContent(content);
-        notification.setRead(false);
-
-        notifRef.child(notificationId).setValue(notification);
     }
 
     public void clearCart(String userId) {
@@ -565,10 +650,47 @@ public class MainRespository {
     }
 
     // THÊM PHƯƠNG THỨC MỚI (linh hoạt hơn)
+
     public void updateOrderStatus(String billId, String newStatus) {
         // Dựa trên cấu trúc file JSON của bạn, node là "Bills" không phải "Bill"
         if (billId != null && !billId.isEmpty() && newStatus != null) {
-            firebaseDatabase.getReference("Bills").child(billId).child("status").setValue(newStatus);
+            //firebaseDatabase.getReference("Bills").child(billId).child("status").setValue(newStatus);
+
+            DatabaseReference billRef = firebaseDatabase.getReference("Bills").child(billId);
+            // Tạo thông báo trong app sau khi Update bill thành công
+            // Bước 1: Lấy dữ liệu của đơn hàng để có được userId
+            billRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    // Chuyển đổi dữ liệu nhận được thành đối tượng BillModel
+                    BillModel bill = snapshot.getValue(BillModel.class);
+
+                    // Kiểm tra xem bill và userId có hợp lệ không
+                    if (bill != null && bill.getUserId() != null) {
+                        // Lấy userId từ đối tượng bill
+                        String userId = bill.getUserId();
+
+                        // Bước 2: Tiến hành cập nhật trạng thái
+                        billRef.child("status").setValue(newStatus).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                // Bước 3: Tạo thông báo sau khi cập nhật thành công
+                                String shortBillId = billId.substring(Math.max(0, billId.length() - 6));
+                                String notificationContent = "Đơn hàng #" + shortBillId + " đã được cập nhật trạng thái thành '" + newStatus + "'.";
+
+                                // Gọi hàm tạo thông báo với userId vừa lấy được
+                                createInAppNotification(userId, notificationContent);
+                            }
+                        });
+                    } else {
+                        Log.e("UpdateStatus", "Không thể tìm thấy đơn hàng hoặc userId cho billId: " + billId);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("UpdateStatus", "Lỗi khi lấy dữ liệu đơn hàng: " + error.getMessage());
+                }
+            });
         }
     }
 
@@ -578,9 +700,11 @@ public class MainRespository {
             return;
         }
         updateOrderStatus(billToCancel.getBillId(), "Cancelled");
+        String billId = billToCancel.getBillId();
+        // Tạo thông báo trong app sau khi hủy bill thành công
+        String notificationContent = "Đơn hàng #" + billId.substring(Math.max(0, billId.length() - 6)) + " của bạn đã được hủy";
+        createInAppNotification(billToCancel.getUserId(), notificationContent);
     }
-
-
     // --- END LOGIC CODE NHUNG ---
 
 }

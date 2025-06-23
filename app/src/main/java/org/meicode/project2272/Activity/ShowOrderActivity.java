@@ -72,6 +72,7 @@ public class ShowOrderActivity extends AppCompatActivity implements ShowOrderAda
                 .setMessage("Bạn có chắc chắn muốn hủy đơn hàng này?")
                 .setPositiveButton("Xác nhận", (dialog, which) -> {
                     viewModel.updateOrderStatus(bill.getBillId(), cancelMessage);
+
                     Toast.makeText(this, "Đã hủy đơn hàng.", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Không", null)

@@ -53,7 +53,7 @@ public class MainViewModel extends ViewModel {
     }
 
     // --- CODE GIỎ HÀNG ĐÃ SỬA ĐỔI ---
-// --- LOGIC GIỎ HÀNG MỚI ---
+    // --- LOGIC GIỎ HÀNG MỚI ---
     public LiveData<ArrayList<ItemsModel>> getCartItems(String userId) {
         MediatorLiveData<ArrayList<ItemsModel>> combinedData = new MediatorLiveData<>();
 
@@ -101,6 +101,9 @@ public class MainViewModel extends ViewModel {
         return combinedData;
     }
 
+    public void addToCart(String userId, String itemId, String size, String color, int quantity) {
+        respository.addToCart(userId, itemId, size, color, quantity);
+    }
     public void updateCartItemQuantity(String userId, String cartId, int change) {
         respository.updateCartItemQuantity(userId, cartId, change);
     }

@@ -89,7 +89,13 @@ public class DetailActivity extends AppCompatActivity {
             newItem.setColor(selectedColor);
 
             // Gọi hàm ViewModel (giả sử đã có) để thêm vào giỏ hàng
-            // viewModel.addItemToCart(currentUser.getUid(), newItem);
+            viewModel.addToCart(
+                    currentUser.getUid(),
+                    object.getId(),
+                    selectedSize,
+                    selectedColor,
+                    quantity // `quantity` là số lượng người dùng đã chọn (hiện đang mặc định là 1)
+            );
             Toast.makeText(this, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
         });
     }

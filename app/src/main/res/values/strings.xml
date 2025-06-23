@@ -71,6 +71,16 @@
         <item>Nâu</item>
         <item>Be</item>
     </string-array>
+    <string-array name="common_colors_hex" translatable="false">
+        <item>#000000</item>
+        <item>#FFFFFF</item>
+        <item>#FF0000</item>
+        <item>#0000FF</item>
+        <item>#FFFF00</item>
+        <item>#808080</item>
+        <item>#A52A2A</item>
+        <item>#F5F5DC</item>
+    </string-array>
 
     <string name="dktk">Đăng ký tài khoản</string>
     <string name="vld">Vui lòng điền đầy đủ thông tin để tạo tài khoản mới.</string>
