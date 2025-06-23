@@ -1,3 +1,5 @@
+// File: org/meicode/project2272/Activity/OrderActivity.java
+// ĐÃ CẬP NHẬT
 package org.meicode.project2272.Activity;
 
 import android.content.Intent;
@@ -49,18 +51,16 @@ public class OrderActivity extends AppCompatActivity {
     }
 
     private void initUI() {
-        // Hiển thị thông tin người dùng
         if (currentUser != null) {
             binding.usernameTxt.setText(currentUser.getUsername());
             binding.phoneTxt.setText(currentUser.getPhone());
             binding.addressEdt.setText(currentUser.getAddress());
         }
 
-        // Hiển thị tổng tiền
         java.text.NumberFormat currencyFormatter = java.text.NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         binding.totalTxt.setText(currencyFormatter.format(totalAmount));
 
-        // Setup RecyclerView
+        // Setup RecyclerView với Adapter mới
         binding.itemsView.setLayoutManager(new LinearLayoutManager(this));
         binding.itemsView.setAdapter(new OrderSummaryAdapter(cartItems));
     }
@@ -88,6 +88,13 @@ public class OrderActivity extends AppCompatActivity {
             item.setTitle(cartItem.getTitle());
             item.setQuantity(cartItem.getNumberinCart());
             item.setPriceAtPurchase(cartItem.getPrice());
+
+            // --- THAY ĐỔI QUAN TRỌNG NHẤT ---
+            // Lấy size và color từ item trong giỏ hàng và gán vào item của hóa đơn
+            item.setSelectedSize(cartItem.getSelectedSize());
+            item.setSelectedColor(cartItem.getSelectedColor());
+            // ------------------------------------
+
             if (cartItem.getPicUrl() != null && !cartItem.getPicUrl().isEmpty()) {
                 item.setPicUrl(cartItem.getPicUrl().get(0));
             }
@@ -99,21 +106,20 @@ public class OrderActivity extends AppCompatActivity {
         bill.setUserId(currentUser.getUid());
         bill.setItems(itemsInBill);
         bill.setTotalAmount(totalAmount);
-        bill.setShippingAddress(address); // Lấy địa chỉ từ EditText
+        bill.setShippingAddress(address);
         bill.setPaymentMethod("Thanh toán khi nhận hàng (COD)");
         bill.setStatus("Pending");
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
         bill.setCreatedAt(sdf.format(Calendar.getInstance().getTime()));
 
-        // 3. Gọi ViewModel để lưu đơn hàng và tạo thông báo
+        // 3. Gọi ViewModel để lưu đơn hàng (logic này không đổi)
         viewModel.placeOrderAndCreateNotification(bill).observe(this, isSuccess -> {
             binding.progressBar.setVisibility(View.GONE);
             if(isSuccess != null && isSuccess) {
                 Toast.makeText(OrderActivity.this, "Đặt hàng thành công!", Toast.LENGTH_LONG).show();
                 viewModel.clearCart(currentUser.getUid());
 
-                // Quay về MainActivity, xóa các activity trung gian
                 Intent intent = new Intent(OrderActivity.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("user", currentUser);

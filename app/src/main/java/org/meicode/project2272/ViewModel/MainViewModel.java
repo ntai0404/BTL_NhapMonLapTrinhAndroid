@@ -15,6 +15,7 @@ import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.NotificationModel;
 import org.meicode.project2272.Model.UserModel;
 import org.meicode.project2272.Respository.MainRespository;
+import org.meicode.project2272.Model.CartModel;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -52,45 +53,56 @@ public class MainViewModel extends ViewModel {
     }
 
     // --- CODE GIỎ HÀNG ĐÃ SỬA ĐỔI ---
-
-    // 1. Sửa hàm getCartItems để nhận userId
+// --- LOGIC GIỎ HÀNG MỚI ---
     public LiveData<ArrayList<ItemsModel>> getCartItems(String userId) {
         MediatorLiveData<ArrayList<ItemsModel>> combinedData = new MediatorLiveData<>();
+
         LiveData<ArrayList<ItemsModel>> allItemsLiveData = respository.getAllItems();
-        LiveData<Map<String, Long>> cartLiveData = respository.getCart(userId);
+        LiveData<ArrayList<CartModel>> cartLiveData = respository.getCart(userId);
 
         Runnable updateCombinedData = () -> {
             ArrayList<ItemsModel> allItems = allItemsLiveData.getValue();
-            Map<String, Long> cartMap = cartLiveData.getValue();
+            ArrayList<CartModel> cartList = cartLiveData.getValue();
 
-            if (allItems == null || cartMap == null) {
+            if (allItems == null || cartList == null) {
                 return;
             }
 
             ArrayList<ItemsModel> cartItemsList = new ArrayList<>();
-            for (ItemsModel item : allItems) {
-                if (cartMap.containsKey(item.getId())) {
-                    ItemsModel itemInCart = new ItemsModel();
-                    itemInCart.setId(item.getId());
-                    itemInCart.setTitle(item.getTitle());
-                    itemInCart.setPrice(item.getPrice());
-                    itemInCart.setPicUrl(item.getPicUrl());
-                    itemInCart.setNumberinCart(cartMap.get(item.getId()).intValue());
-                    cartItemsList.add(itemInCart);
+            for (CartModel cartItem : cartList) {
+                for (ItemsModel item : allItems) {
+                    if (item.getId() != null && item.getId().equals(cartItem.getItemId())) {
+                        ItemsModel itemInCart = new ItemsModel();
+
+                        // Sao chép thuộc tính gốc từ sản phẩm
+                        itemInCart.setId(item.getId());
+                        itemInCart.setTitle(item.getTitle());
+                        itemInCart.setPrice(item.getPrice());
+                        itemInCart.setPicUrl(item.getPicUrl());
+                        //... sao chép các thuộc tính cần thiết khác nếu có
+
+                        // Bổ sung thông tin riêng của giỏ hàng
+                        itemInCart.setCartId(cartItem.getCartId());
+                        itemInCart.setNumberinCart(cartItem.getQuantity());
+                        itemInCart.setSelectedSize(cartItem.getSize());
+                        itemInCart.setSelectedColor(cartItem.getColor());
+
+                        cartItemsList.add(itemInCart);
+                        break;
+                    }
                 }
             }
             combinedData.setValue(cartItemsList);
         };
 
         combinedData.addSource(allItemsLiveData, allItems -> updateCombinedData.run());
-        combinedData.addSource(cartLiveData, cartMap -> updateCombinedData.run());
+        combinedData.addSource(cartLiveData, cartList -> updateCombinedData.run());
 
         return combinedData;
     }
 
-    // 2. Sửa hàm manageCartItem để nhận userId
-    public void manageCartItem(String userId, String itemId, int change) {
-        respository.manageCartItem(userId, itemId, change);
+    public void updateCartItemQuantity(String userId, String cartId, int change) {
+        respository.updateCartItemQuantity(userId, cartId, change);
     }
 
     // --- CODE Notification ---

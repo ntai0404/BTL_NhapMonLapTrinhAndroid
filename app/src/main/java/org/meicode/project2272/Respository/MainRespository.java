@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import org.meicode.project2272.Model.BannerModel;
 import org.meicode.project2272.Model.BillModel;
+import org.meicode.project2272.Model.CartModel;
 import org.meicode.project2272.Model.CategoryModel;
 import org.meicode.project2272.Model.ItemsModel;
 import org.meicode.project2272.Model.NotificationModel;
@@ -129,76 +130,78 @@ public class MainRespository {
     }
 
 
-    // --- LOGIC CHO GIỎ HÀNG (CART) ĐÃ SỬA ĐỔI ---
 
+    // --- LOGIC GIỎ HÀNG MỚI ---
     public LiveData<ArrayList<ItemsModel>> getAllItems() {
+        // Giả sử bạn có một hàm load tất cả sản phẩm, ví dụ loadPopular
+        // Nếu không, bạn cần tạo một hàm riêng để lấy tất cả item từ Firebase
         return loadPopular();
     }
 
-    // 1. Sửa hàm manageCartItem để nhận userId
-    public void manageCartItem(String userId, String itemId, int change) {
-        if (userId == null || itemId == null) return;
-
-        DatabaseReference cartItemRef = firebaseDatabase.getReference("Carts")
-                .child(userId)
-                .child(itemId);
-
-        cartItemRef.runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                Long currentQuantity = mutableData.getValue(Long.class);
-                if (currentQuantity == null) {
-                    if (change > 0) mutableData.setValue(change);
-                } else {
-                    long newQuantity = currentQuantity + change;
-                    if (newQuantity > 0) {
-                        mutableData.setValue(newQuantity);
-                    } else {
-                        mutableData.setValue(null); // Xóa item nếu số lượng <= 0
-                    }
-                }
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-                if (error != null) System.out.println("Firebase transaction failed: " + error.getMessage());
-            }
-        });
-    }
-
-    // 2. Sửa hàm getCart để nhận userId
-    public MutableLiveData<Map<String, Long>> getCart(String userId) {
-        MutableLiveData<Map<String, Long>> cartData = new MutableLiveData<>();
+    public LiveData<ArrayList<CartModel>> getCart(String userId) {
+        MutableLiveData<ArrayList<CartModel>> liveData = new MutableLiveData<>();
         if (userId == null) {
-            cartData.postValue(new HashMap<>()); // Trả về giỏ hàng rỗng nếu không có userId
-            return cartData;
+            liveData.postValue(new ArrayList<>());
+            return liveData;
         }
 
         DatabaseReference cartRef = firebaseDatabase.getReference("Carts").child(userId);
         cartRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Map<String, Long> cartMap = new HashMap<>();
+                ArrayList<CartModel> cartList = new ArrayList<>();
                 if (snapshot.exists()) {
-                    for(DataSnapshot itemSnapshot : snapshot.getChildren()){
-                        String itemId = itemSnapshot.getKey();
-                        Long quantity = itemSnapshot.getValue(Long.class);
-                        if(itemId != null && quantity != null){
-                            cartMap.put(itemId, quantity);
+                    for(DataSnapshot cartEntrySnapshot : snapshot.getChildren()){
+                        CartModel cartItem = cartEntrySnapshot.getValue(CartModel.class);
+                        if(cartItem != null){
+                            cartItem.setCartId(cartEntrySnapshot.getKey());
+                            cartList.add(cartItem);
                         }
                     }
                 }
-                cartData.postValue(cartMap);
+                liveData.postValue(cartList);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                cartData.postValue(new HashMap<>());
+                liveData.postValue(new ArrayList<>());
             }
         });
-        return cartData;
+        return liveData;
+    }
+
+    public void updateCartItemQuantity(String userId, String cartId, int change) {
+        if (userId == null || cartId == null) return;
+
+        DatabaseReference cartItemRef = firebaseDatabase.getReference("Carts")
+                .child(userId)
+                .child(cartId);
+
+        cartItemRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                CartModel cartItem = mutableData.getValue(CartModel.class);
+                if (cartItem == null) {
+                    return Transaction.success(mutableData);
+                }
+                long newQuantity = cartItem.getQuantity() + change;
+                if (newQuantity > 0) {
+                    cartItem.setQuantity((int) newQuantity);
+                    mutableData.setValue(cartItem);
+                } else {
+                    mutableData.setValue(null);
+                }
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
+                if (error != null) {
+                    Log.e("FirebaseTransaction", "Lỗi cập nhật giỏ hàng: " + error.getMessage());
+                }
+            }
+        });
     }
     // -- end logic CART >.<
 

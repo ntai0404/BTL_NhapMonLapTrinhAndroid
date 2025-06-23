@@ -1,3 +1,4 @@
+
 package org.meicode.project2272.Activity;
 
 import android.content.Intent;
@@ -18,7 +19,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     private MainViewModel viewModel;
     private CartAdapter cartAdapter;
     private UserModel currentUser;
-    private double totalAmount = 0; // Biến để lưu tổng tiền
+    private double totalAmount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +36,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     private void setVariables() {
         binding.backBtn.setOnClickListener(v -> finish());
 
-        // Thêm sự kiện cho nút thanh toán
-        // Giả sử bạn có một nút checkoutBtn trong layout activity_cart.xml
         binding.checkoutBtn.setOnClickListener(v -> {
             if (cartAdapter.listItemSelected == null || cartAdapter.listItemSelected.isEmpty()) {
                 return;
@@ -51,7 +50,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
 
     private void initCartList() {
         binding.cartView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        binding.checkoutBtn.setVisibility(View.GONE); // Ẩn ban đầu
+        binding.checkoutBtn.setVisibility(View.GONE);
 
         cartAdapter = new CartAdapter(new ArrayList<>(), this);
         binding.cartView.setAdapter(cartAdapter);
@@ -60,14 +59,10 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
             viewModel.getCartItems(currentUser.getUid()).observe(this, itemsInCart -> {
                 if (itemsInCart == null || itemsInCart.isEmpty()) {
                     binding.emptyTxt.setVisibility(View.VISIBLE);
-                    binding.headerLayout.setVisibility(View.VISIBLE);
                     binding.scrollView3.setVisibility(View.GONE);
-                    binding.checkoutBtn.setVisibility(View.GONE);
                 } else {
                     binding.emptyTxt.setVisibility(View.GONE);
-                    binding.headerLayout.setVisibility(View.VISIBLE);
                     binding.scrollView3.setVisibility(View.VISIBLE);
-                    binding.checkoutBtn.setVisibility(View.VISIBLE);
                 }
 
                 cartAdapter.listItemSelected = itemsInCart;
@@ -77,17 +72,19 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         }
     }
 
-
     private void calculatorCart(ArrayList<ItemsModel> items) {
         java.text.NumberFormat currencyFormatter = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
         double percentTax = 0.02;
         double delivery = 30000;
         double itemTotal = 0;
 
-        if (items != null) {
+        if (items != null && !items.isEmpty()) {
             for (ItemsModel item : items) {
-                itemTotal += item.getPrice() * item.getNumberinCart();
+                itemTotal += (double) item.getPrice() * item.getNumberinCart();
             }
+            binding.checkoutBtn.setVisibility(View.VISIBLE);
+        } else {
+            binding.checkoutBtn.setVisibility(View.GONE);
         }
 
         double tax = itemTotal * percentTax;
@@ -100,15 +97,16 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     }
 
     @Override
-    public void onPlusClick(String itemId) {
+    public void onPlusClick(String cartId) {
         if (currentUser != null) {
-            viewModel.manageCartItem(currentUser.getUid(), itemId, 1);
+            viewModel.updateCartItemQuantity(currentUser.getUid(), cartId, 1);
         }
     }
+
     @Override
-    public void onMinusClick(String itemId) {
+    public void onMinusClick(String cartId) {
         if (currentUser != null) {
-            viewModel.manageCartItem(currentUser.getUid(), itemId, -1);
+            viewModel.updateCartItemQuantity(currentUser.getUid(), cartId, -1);
         }
     }
 }

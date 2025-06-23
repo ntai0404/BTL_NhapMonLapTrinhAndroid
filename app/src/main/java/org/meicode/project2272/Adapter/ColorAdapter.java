@@ -1,77 +1,83 @@
+// File: org/meicode/project2272/Adapter/ColorAdapter.java
 package org.meicode.project2272.Adapter;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-
 import org.meicode.project2272.R;
 import org.meicode.project2272.databinding.ViewholderColorBinding;
-
 import java.util.ArrayList;
 
-public class ColorAdapter extends RecyclerView.Adapter<ColorAdapter.ViewHolder>{
-    ArrayList<String> items;
-    Context context;
-    int selectedPosition = -1;
-    int lastSelectedPosition = -1;
-    public ColorAdapter(ArrayList<String> items) {
-        this.items = items;}
+public class ColorAdapter extends RecyclerView.Adapter<ColorAdapter.ViewHolder> {
+
+    private final ArrayList<String> items;
+    private final OnColorSelectedListener listener;
+    private int selectedPosition = -1;
+    private Context context;
+
+    /**
+     * Interface để gửi "tín hiệu" chứa mã màu đã chọn ra bên ngoài.
+     */
+    public interface OnColorSelectedListener {
+        void onColorSelected(String color);
+    }
+
+    /**
+     * Constructor nhận vào danh sách mã màu và một đối tượng listener.
+     */
+    public ColorAdapter(ArrayList<String> items, OnColorSelectedListener listener) {
+        this.items = items;
+        this.listener = listener;
+    }
 
     @NonNull
     @Override
-    public ColorAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
         ViewholderColorBinding binding = ViewholderColorBinding.inflate(LayoutInflater.from(context), parent, false);
-
         return new ViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        // Tô màu cho view
+        try {
+            holder.binding.colorView.setBackgroundColor(Color.parseColor(items.get(position)));
+        } catch (Exception e) {
+            // Xử lý nếu mã màu không hợp lệ
+        }
+
         holder.itemView.setOnClickListener(v -> {
-            lastSelectedPosition = selectedPosition;
+            int previousSelectedPosition = selectedPosition;
             selectedPosition = holder.getAdapterPosition();
-            notifyItemChanged(lastSelectedPosition);
+
+            // Gọi listener để thông báo cho DetailActivity
+            if (listener != null) {
+                listener.onColorSelected(items.get(selectedPosition));
+            }
+
+            notifyItemChanged(previousSelectedPosition);
             notifyItemChanged(selectedPosition);
         });
 
-        if(selectedPosition == holder.getAdapterPosition())
-        {
-            Drawable unwrappedDrawable = AppCompatResources.getDrawable(context, R.drawable.color_selected);
-            Glide.with(context)
-                    .load(unwrappedDrawable)
-                    .apply(RequestOptions.circleCropTransform())
-                    .into(holder.binding.colorLayout);
+        // Hiển thị viền hoặc dấu check nếu được chọn
+        if (selectedPosition == holder.getAdapterPosition()) {
+            holder.binding.selector.setVisibility(View.VISIBLE);
+        } else {
+            holder.binding.selector.setVisibility(View.GONE);
         }
-        else {
-            Drawable unwrappedDrawable = AppCompatResources.getDrawable(context, R.drawable.color_selected);
-            Drawable wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable);
-            DrawableCompat.setTint(wrappedDrawable, Color.parseColor(items.get(position)));
-            Glide.with(context)
-                    .load(wrappedDrawable)
-                    .apply(RequestOptions.circleCropTransform())
-                    .into(holder.binding.colorLayout);
-        }
-
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return items != null ? items.size() : 0;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         ViewholderColorBinding binding;
         public ViewHolder(ViewholderColorBinding binding) {
             super(binding.getRoot());

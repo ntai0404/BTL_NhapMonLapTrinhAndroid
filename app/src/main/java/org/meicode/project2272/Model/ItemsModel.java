@@ -1,10 +1,12 @@
+// File: org/meicode/project2272/Model/ItemsModel.java
 package org.meicode.project2272.Model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class ItemsModel implements Serializable {
-    private String id; // THÊM TRƯỜNG ID
+    // Các trường dữ liệu gốc từ Firebase "Items"
+    private String id;
     private String title;
     private String description;
     private String offPercent;
@@ -15,20 +17,18 @@ public class ItemsModel implements Serializable {
     private int oldPrice;
     private int review;
     private double rating;
-    private int NumberinCart;
+
+    // Các trường dữ liệu "transient" - được gán lúc runtime để hiển thị trong giỏ hàng
+    private String cartId;
+    private int numberinCart;
+    private String selectedSize; // Size đã chọn trong giỏ hàng
+    private String selectedColor; // Màu đã chọn trong giỏ hàng
 
     public ItemsModel() {}
 
-    // THÊM GETTER VÀ SETTER CHO ID
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    // --- Các getters và setters khác giữ nguyên ---
+    // Getters và Setters cho tất cả các trường
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getDescription() { return description; }
@@ -49,6 +49,14 @@ public class ItemsModel implements Serializable {
     public void setReview(int review) { this.review = review; }
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }
-    public int getNumberinCart() { return NumberinCart; }
-    public void setNumberinCart(int numberInCart) { NumberinCart = numberInCart; }
+
+    // Getters and Setters cho các trường transient
+    public String getCartId() { return cartId; }
+    public void setCartId(String cartId) { this.cartId = cartId; }
+    public int getNumberinCart() { return numberinCart; }
+    public void setNumberinCart(int numberinCart) { this.numberinCart = numberinCart; }
+    public String getSelectedSize() { return selectedSize; }
+    public void setSelectedSize(String selectedSize) { this.selectedSize = selectedSize; }
+    public String getSelectedColor() { return selectedColor; }
+    public void setSelectedColor(String selectedColor) { this.selectedColor = selectedColor; }
 }

@@ -120,7 +120,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                tools:listitem="@layout/viewholder_order_summary_item"/>
+                tools:listitem="@layout/viewholder_order_summary"/>
 
         </LinearLayout>
     </ScrollView>
