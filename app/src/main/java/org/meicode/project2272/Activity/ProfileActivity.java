@@ -132,16 +132,44 @@ public class ProfileActivity extends AppCompatActivity {
      * Thu thập dữ liệu từ các EditText và bắt đầu quá trình cập nhật.
      */
     private void updateProfile() {
+        // --- BẮT ĐẦU ĐOẠN CODE VALIDATE ---
+        String username = binding.usernameEdt.getText().toString().trim();
+        String address = binding.addressEdt.getText().toString().trim();
+        String phone = binding.phoneEdt.getText().toString().trim();
+
+        // 1. Validate Tên người dùng không được để trống
+        if (username.isEmpty()) {
+            binding.usernameEdt.setError("Tên người dùng không được để trống.");
+            binding.progressBar.setVisibility(View.GONE); // Dừng và ẩn loading
+            return; // Dừng việc cập nhật
+        }
+
+        // 2. Validate Địa chỉ không được để trống
+        if (address.isEmpty()) {
+            binding.addressEdt.setError("Địa chỉ không được để trống.");
+            binding.progressBar.setVisibility(View.GONE); // Dừng và ẩn loading
+            return; // Dừng việc cập nhật
+        }
+
+        // 3. Validate Số điện thoại (đã có từ trước)
+        if (!isValidPhoneNumber(phone)) {
+            binding.phoneEdt.setError("Số điện thoại không hợp lệ (gồm 10 chữ số, bắt đầu bằng 0).");
+            binding.progressBar.setVisibility(View.GONE); // Dừng và ẩn loading
+            return; // Dừng việc cập nhật
+        }
+        // --- KẾT THÚC ĐOẠN CODE VALIDATE ---
+
+
         // Tạo một đối tượng user mới để chứa thông tin sẽ được cập nhật
         UserModel userToUpdate = new UserModel();
         userToUpdate.setUid(currentUser.getUid());
         userToUpdate.setRole(currentUser.getRole());
         userToUpdate.setPassword(currentUser.getPassword());
 
-        userToUpdate.setUsername(binding.usernameEdt.getText().toString().trim());
+        userToUpdate.setUsername(username); // Dùng biến đã được trim()
         userToUpdate.setEmail(binding.emailEdt.getText().toString().trim());
-        userToUpdate.setPhone(binding.phoneEdt.getText().toString().trim());
-        userToUpdate.setAddress(binding.addressEdt.getText().toString().trim());
+        userToUpdate.setPhone(phone); // Dùng biến đã được trim()
+        userToUpdate.setAddress(address); // Dùng biến đã được trim()
 
         String newPassword = binding.passwordEdt.getText().toString();
         if (!newPassword.isEmpty()) {
@@ -198,5 +226,16 @@ public class ProfileActivity extends AppCompatActivity {
         // 5. Ẩn progress bar và hiển thị thông báo thành công.
         binding.progressBar.setVisibility(View.GONE);
         Toast.makeText(ProfileActivity.this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isValidPhoneNumber(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            // Nếu bạn cho phép trường số điện thoại được để trống, hãy trả về true ở đây.
+            // Còn nếu bắt buộc phải nhập, trả về false là đúng.
+            return false;
+        }
+        // Regex cho SĐT Việt Nam: Bắt đầu bằng 0, theo sau là 9 chữ số. Tổng cộng 10 chữ số.
+        String phoneRegex = "^0\\d{9}$";
+        return phone.matches(phoneRegex);
     }
 }
