@@ -447,26 +447,22 @@ public class MainRespository {
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                ArrayList<BillModel> list = new ArrayList<>();
+                ArrayList<BillModel> completedList = new ArrayList<>();
                 if (snapshot.exists()) {
-                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                        if (userSnapshot.hasChildren()) {
-                            for (DataSnapshot billSnapshot : userSnapshot.getChildren()) {
-                                try {
-                                    BillModel item = billSnapshot.getValue(BillModel.class);
-
-                                    // THAY ĐỔI: Đổi "Hoàn thành" thành "Completed"
-                                    if (item != null && "Completed".equalsIgnoreCase(item.getStatus())) {
-                                        list.add(item);
-                                    }
-                                } catch (Exception e) {
-                                    Log.e("FirebaseError", "Không thể phân tích hóa đơn: " + billSnapshot.getKey(), e);
-                                }
+                    // SỬA LỖI: Bỏ vòng lặp lồng nhau, xử lý trực tiếp các bill
+                    for (DataSnapshot billSnapshot : snapshot.getChildren()) {
+                        try {
+                            BillModel item = billSnapshot.getValue(BillModel.class);
+                            // Kiểm tra trạng thái "Completed" như bạn đã xác nhận
+                            if (item != null && "Completed".equalsIgnoreCase(item.getStatus())) {
+                                completedList.add(item);
                             }
+                        } catch (Exception e) {
+                            Log.e("FirebaseError", "Lỗi khi phân tích hóa đơn: " + billSnapshot.getKey(), e);
                         }
                     }
                 }
-                listData.setValue(list);
+                listData.setValue(completedList);
             }
 
             @Override
@@ -568,34 +564,20 @@ public class MainRespository {
         return liveData;
     }
 
-    public void cancelOrder(BillModel billToCancel) {
-        if (billToCancel == null || billToCancel.getBillId() == null || billToCancel.getUserId() == null) {
-            return; // Không đủ thông tin để hủy
+    // THÊM PHƯƠNG THỨC MỚI (linh hoạt hơn)
+    public void updateOrderStatus(String billId, String newStatus) {
+        // Dựa trên cấu trúc file JSON của bạn, node là "Bills" không phải "Bill"
+        if (billId != null && !billId.isEmpty() && newStatus != null) {
+            firebaseDatabase.getReference("Bills").child(billId).child("status").setValue(newStatus);
         }
+    }
 
-        String userId = billToCancel.getUserId();
-        String billId = billToCancel.getBillId();
-
-        DatabaseReference ref = firebaseDatabase.getReference("Bills");
-
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Thử tìm trong cấu trúc lồng nhau trước
-                if (snapshot.hasChild(userId) && snapshot.child(userId).hasChild(billId)) {
-                    snapshot.child(userId).child(billId).getRef().child("status").setValue("Đã hủy");
-                }
-                // Nếu không thấy, thử tìm trong cấu trúc phẳng
-                else if (snapshot.hasChild(billId)) {
-                    snapshot.child(billId).getRef().child("status").setValue("Đã hủy");
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Xử lý lỗi khi tìm đơn hàng để hủy
-            }
-        });
+    // Sửa lại hàm cancelOrder cũ để gọi hàm mới cho nhất quán
+    public void cancelOrder(BillModel billToCancel) {
+        if (billToCancel == null || billToCancel.getBillId() == null) {
+            return;
+        }
+        updateOrderStatus(billToCancel.getBillId(), "Cancelled");
     }
 
 

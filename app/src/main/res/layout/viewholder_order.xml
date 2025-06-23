@@ -88,17 +88,34 @@
             tools:text="Người dùng: user@example.com"
             tools:visibility="visible" />
 
-        <Button
-            android:id="@+id/cancelBtn"
+        <LinearLayout
+            android:id="@+id/actionsLayout"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginTop="12dp"
-            android:backgroundTint="#E53935"
-            android:text="Hủy Đơn Hàng"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
             android:visibility="gone"
-            tools:visibility="visible" />
+            tools:visibility="visible">
+
+            <Button
+                android:id="@+id/updateStatusBtn"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="Xác nhận"
+                android:textSize="14sp"
+                android:layout_marginEnd="4dp"/>
+
+            <Button
+                android:id="@+id/cancelBtn"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:backgroundTint="#E53935"
+                android:text="Hủy Đơn"
+                android:textSize="14sp"
+                android:layout_marginStart="4dp"/>
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -182,9 +182,13 @@ public class MainViewModel extends ViewModel {
     public MutableLiveData<ArrayList<BillModel>> getUserOrders(String userId) {
         return respository.getUserOrders(userId);
     }
-    public void cancelOrder(BillModel bill) {
-        respository.cancelOrder(bill);
+    // THÊM PHƯƠNG THỨC MỚI
+    public void updateOrderStatus(String billId, String newStatus) {
+        respository.updateOrderStatus(billId, newStatus);
     }
+
+    // Phương thức cancelOrder cũ có thể không cần thiết nữa, nhưng cứ để lại
+    public void cancelOrder(BillModel bill) { respository.cancelOrder(bill); }
     // ---END LOGIC CODE NHUNG---
 }
 
